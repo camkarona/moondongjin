@@ -58,6 +58,54 @@
             0%, 100% { opacity: 0.8; }
             50%       { opacity: 0.1; }
         }
+        @keyframes charSway {
+            0%, 100% { transform: rotate(0deg); }
+            25%       { transform: rotate(2.5deg); }
+            75%       { transform: rotate(-2.5deg); }
+        }
+        .char-display { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        #char-img {
+            width: 306px; height: 306px; object-fit: contain;
+            animation: charSway 1.5s ease-in-out infinite;
+            transform-origin: center bottom;
+        }
+        .char-name { font-size: 20px; font-weight: 900; color: white; }
+        .char-status { font-size: 14px; color: rgba(255,255,255,0.7); }
+
+        /* ── 포기하기 버튼 & 팝업 ── */
+        .btn-quit-game {
+            width: 100%; padding: 11px 0; font-size: 13px; font-weight: bold;
+            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.18);
+            color: rgba(255,255,255,0.42); border-radius: 14px;
+            cursor: pointer; touch-action: manipulation;
+        }
+        .btn-quit-game:active { opacity: 0.6; }
+        #quit-overlay { z-index: 300; }
+        .quit-box {
+            background: linear-gradient(160deg, #1a1a2e 0%, #16213e 100%);
+            border: 3px solid #f1c40f; border-radius: 24px;
+            padding: 32px 24px; text-align: center; color: white;
+            width: 88%; max-width: 320px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.85);
+        }
+        .quit-icon { font-size: 52px; margin: 0 0 6px; line-height: 1; }
+        .quit-title { font-size: 22px; font-weight: 900; color: #f1c40f; margin: 0 0 12px; }
+        .quit-msg { font-size: 15px; line-height: 1.9; color: #ecf0f1; margin: 0 0 24px; }
+        .quit-btns { display: flex; gap: 12px; }
+        .quit-btn-cancel, .quit-btn-confirm {
+            flex: 1; padding: 14px 0; border: none; border-radius: 14px;
+            font-size: 16px; font-weight: bold; cursor: pointer; touch-action: manipulation;
+        }
+        .quit-btn-cancel {
+            background: #2c3e50; color: #bdc3c7;
+            box-shadow: 0 4px 0 #1a252f;
+        }
+        .quit-btn-cancel:active  { transform: translateY(3px); box-shadow: 0 1px 0 #1a252f; }
+        .quit-btn-confirm {
+            background: linear-gradient(to bottom, #e74c3c, #c0392b); color: white;
+            box-shadow: 0 4px 0 #96281b;
+        }
+        .quit-btn-confirm:active { transform: translateY(3px); box-shadow: 0 1px 0 #96281b; }
 
         /* ── 볼륨 설정 버튼/패널 ── */
         .settings-btn {
@@ -164,10 +212,10 @@
         }
         .action-zone {
             width: 100%; flex-grow: 1;
-            display: flex; justify-content: center; align-items: center;
+            display: flex; flex-direction: column; justify-content: center; gap: 22px;
         }
         .btn-cut {
-            width: 100%; height: 105px; font-size: 22px;
+            width: 100%; height: 120px; font-size: 24px;
             background: linear-gradient(to bottom, #e67e22, #d35400);
             color: white; border: none; border-radius: 20px;
             box-shadow: 0 8px 0 #a04000; font-weight: 900; cursor: pointer;
@@ -304,7 +352,7 @@
         .sol-input-area {
             width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px;
         }
-        .sol-input-label { color: #f1c40f; font-size: 13px; font-weight: bold; text-align: center; }
+        .sol-input-label { color: #f1c40f; font-size: 15px; font-weight: bold; text-align: center; }
         .sol-spinner-wrap { display: flex; align-items: center; gap: 12px; width: 100%; justify-content: center; }
         .sol-spin-btn {
             width: 68px; height: 68px; font-size: 34px; font-weight: 900; line-height: 1;
@@ -345,8 +393,8 @@
             <div id="settings-panel" class="settings-panel">
                 <p class="settings-title">🔊 볼륨 설정</p>
                 <div class="vol-row">
-                    <div class="vol-label"><span>🎵 음악</span><span id="lbl-bgm">70%</span></div>
-                    <input type="range" min="0" max="100" value="70" oninput="updateBgmVol(this.value)">
+                    <div class="vol-label"><span>🎵 음악</span><span id="lbl-bgm">50%</span></div>
+                    <input type="range" min="0" max="100" value="50" oninput="updateBgmVol(this.value)">
                 </div>
                 <div class="vol-row">
                     <div class="vol-label"><span>🔔 효과음</span><span id="lbl-sfx">100%</span></div>
@@ -357,10 +405,10 @@
                 <h1 class="main-title">문동진<br>할 수 있어?</h1>
                 <span class="sub-title">본격 갓생 역경 돌파 게임</span>
             </div>
-            <div class="char-placeholder">
-                <span style="font-size:40px;">🏃‍♂️</span>
-                <span style="font-size:20px; font-weight:900;">문사장</span>
-                <span style="font-size:14px;">대기중</span>
+            <div class="char-display">
+                <img id="char-img" src="moondongjincartoon.webp" alt="문동진">
+                <span class="char-name">문사장</span>
+                <span class="char-status">대기중 ✅</span>
             </div>
             <div style="display:flex; flex-direction:column; align-items:center; gap:14px; width:100%;">
                 <button class="btn" onclick="onGameStart()">게임 시작</button>
@@ -406,6 +454,7 @@
             </div>
             <div class="action-zone">
                 <button id="btn-action" class="btn-cut">지금 싹둑 컷!!</button>
+                <button class="btn-quit-game" onclick="showQuit()">🏳️ 포기하기</button>
             </div>
         </div>
 
@@ -436,6 +485,7 @@
                     <button class="sol-spin-btn" id="sol-spin-plus">+</button>
                 </div>
                 <button id="btn-solar-submit" class="btn-cut" style="height:72px; width:100%;">확인!</button>
+                <button class="btn-quit-game" onclick="showQuit()">🏳️ 포기하기</button>
             </div>
         </div>
 
@@ -497,11 +547,24 @@
             </div>
         </div>
 
+        <!-- 포기하기 확인 팝업 -->
+        <div id="quit-overlay" class="overlay">
+            <div class="quit-box">
+                <p class="quit-icon">🏳️</p>
+                <h3 class="quit-title">포기하기</h3>
+                <p class="quit-msg">포기하고 첫 화면으로<br>돌아가시겠습니까?</p>
+                <div class="quit-btns">
+                    <button class="quit-btn-confirm" onclick="confirmQuit()">확인</button>
+                    <button class="quit-btn-cancel" onclick="closeQuit()">취소</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
         const bgm = document.getElementById('bgm');
-        let bgmVol = 70;
+        let bgmVol = 50;
         let sfxVol = 100;
 
         // ── 사운드 이펙트 (Web Audio API) ──
@@ -845,6 +908,26 @@
         function goToSelect() {
             document.getElementById('final-overlay').classList.remove('show');
             changeScene('scene-select');
+        }
+
+        // ── 포기하기 팝업 ──
+        function showQuit() {
+            document.getElementById('quit-overlay').classList.add('show');
+        }
+        function closeQuit() {
+            document.getElementById('quit-overlay').classList.remove('show');
+        }
+        function confirmQuit() {
+            closeQuit();
+            // 빵 게임 애니메이션 중단
+            isPlaying = false;
+            cancelAnimationFrame(rafId);
+            // 솔라 스피너 중단
+            solSpinStop();
+            // 열린 오버레이 전부 닫기
+            ['result-overlay','final-overlay','tooltip-overlay','sol-tooltip-overlay']
+                .forEach(id => document.getElementById(id).classList.remove('show'));
+            changeScene('scene-main');
         }
 
         document.getElementById('btn-action').addEventListener('pointerdown', function(e) {
