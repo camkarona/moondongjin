@@ -254,6 +254,77 @@
             background: #222; color: #444; border: none; border-radius: 15px;
             box-shadow: 0 6px 0 #111; cursor: not-allowed; letter-spacing: 3px;
         }
+
+        /* ── 솔라패널 게임 ── */
+        #scene-solar {
+            background: linear-gradient(to bottom, #0d1b2a, #1b263b);
+            justify-content: flex-start; gap: 14px; padding: 35px 20px 20px;
+        }
+        .sol-header {
+            width: 100%; text-align: center; background: rgba(0,0,0,0.45);
+            padding: 12px; border-radius: 15px; border: 1px solid #f39c12;
+        }
+        .solar-scene {
+            width: 100%; height: 230px;
+            background: linear-gradient(180deg, #0d47a1 0%, #1565c0 25%, #42a5f5 55%, #80deea 68%, #a5d6a7 72%, #66bb6a 78%);
+            border-radius: 16px; position: relative; overflow: hidden;
+        }
+        .sol-sun {
+            position: absolute; font-size: 38px;
+            filter: drop-shadow(0 0 12px rgba(255,220,0,1));
+            transform: translateX(-50%);
+            pointer-events: none;
+            transition: left 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        top  0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .sol-pole {
+            position: absolute; left: calc(50% - 4px); bottom: 28px;
+            width: 8px; height: 32px; background: #78909c; border-radius: 2px 2px 0 0;
+        }
+        .sol-arm {
+            position: absolute; left: 50%; bottom: 60px;
+            width: 115px; height: 14px; margin-top: -7px;
+            background: repeating-linear-gradient(90deg, #1565c0, #1565c0 13px, #0d47a1 13px, #0d47a1 15px);
+            border: 2px solid #42a5f5; border-radius: 3px;
+            transform-origin: left center; transform: rotate(0deg);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .sol-guide-arm {
+            position: absolute; left: 50%; bottom: 60px;
+            width: 115px; height: 8px; margin-top: -4px;
+            border: 2px dashed rgba(241,196,15,0.9); border-radius: 3px;
+            transform-origin: left center; display: none;
+        }
+        .sol-angle-text {
+            position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%);
+            font-size: 13px; font-weight: 900; color: #fff;
+            background: rgba(0,0,0,0.6); padding: 2px 12px; border-radius: 8px;
+            white-space: nowrap;
+        }
+        .sol-input-area {
+            width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px;
+        }
+        .sol-input-label { color: #f1c40f; font-size: 13px; font-weight: bold; text-align: center; }
+        .sol-spinner-wrap { display: flex; align-items: center; gap: 12px; width: 100%; justify-content: center; }
+        .sol-spin-btn {
+            width: 68px; height: 68px; font-size: 34px; font-weight: 900; line-height: 1;
+            background: linear-gradient(to bottom, #1976d2, #0d47a1);
+            color: #f1c40f; border: 3px solid #42a5f5; border-radius: 14px;
+            cursor: pointer; touch-action: manipulation; flex-shrink: 0;
+            box-shadow: 0 5px 0 #083080;
+        }
+        .sol-spin-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #083080; }
+        .sol-spin-btn:disabled { background: #444; border-color: #666; box-shadow: none; color: #888; cursor: default; transform: none; }
+        .sol-spin-display {
+            display: flex; align-items: baseline; gap: 3px; justify-content: center;
+            background: #1a2535; border: 3px solid #f39c12; border-radius: 14px;
+            padding: 6px 14px; flex: 1; max-width: 155px;
+        }
+        #sol-spin-val {
+            font-size: 52px; font-weight: 900; color: #f1c40f;
+            min-width: 60px; text-align: right; line-height: 1.1;
+        }
+        .sol-spin-unit { font-size: 26px; color: #f1c40f; font-weight: 900; }
     </style>
 </head>
 <body>
@@ -306,7 +377,7 @@
             </div>
             <div style="width:100%; display:flex; flex-direction:column; align-items:center; gap:14px;">
                 <button class="btn btn-menu" onclick="loadCuttingGame()">🥐 소금빵 황금비율 컷팅</button>
-                <button class="btn-locked" disabled>🔒 &nbsp; COMING SOON</button>
+                <button class="btn btn-menu" onclick="loadSolarGame()">☀️ 솔라패널 황금 각도</button>
                 <button class="btn-locked" disabled>🔒 &nbsp; COMING SOON</button>
                 <button class="btn-locked" disabled>🔒 &nbsp; COMING SOON</button>
                 <button class="btn-locked" disabled>🔒 &nbsp; COMING SOON</button>
@@ -338,6 +409,36 @@
             </div>
         </div>
 
+        <!-- ④ 솔라패널 게임 화면 -->
+        <div id="scene-solar" class="scene">
+            <div class="sol-header">
+                <div class="status-bar">
+                    <span id="sol-count">라운드: 1 / 10</span>
+                    <span style="color:#f39c12; font-size:13px; font-weight:bold;">각도 추정 게임</span>
+                </div>
+                <p id="sol-bubble" class="customer-bubble">"..."</p>
+                <div id="sol-mission" class="target-mission" style="background:#1565c0;">☀️ 각도를 맞혀라!</div>
+            </div>
+            <div class="solar-scene">
+                <span id="sol-sun" class="sol-sun">☀️</span>
+                <div class="sol-pole"></div>
+                <div id="sol-guide-arm" class="sol-guide-arm"></div>
+                <div id="sol-arm" class="sol-arm"></div>
+                <div id="sol-angle-text" class="sol-angle-text" style="display:none;"></div>
+            </div>
+            <div class="sol-input-area">
+                <p class="sol-input-label">패널이 몇 도로 기울어져 있나요?</p>
+                <div class="sol-spinner-wrap">
+                    <button class="sol-spin-btn" id="sol-spin-minus">−</button>
+                    <div class="sol-spin-display" id="sol-spin-display">
+                        <span id="sol-spin-val">45</span><span class="sol-spin-unit">°</span>
+                    </div>
+                    <button class="sol-spin-btn" id="sol-spin-plus">+</button>
+                </div>
+                <button id="btn-solar-submit" class="btn-cut" style="height:72px; width:100%;">확인!</button>
+            </div>
+        </div>
+
         <!-- 툴팁 오버레이 -->
         <div id="tooltip-overlay" class="overlay">
             <div class="tooltip-box">
@@ -348,6 +449,19 @@
                 <p class="tip-warn">⚠️ 오차 허용 단 <span style="font-size:22px; font-weight:900;">5%</span>!</p>
                 <p style="font-size:12px; color:#95a5a6;">총 10명의 손님을 응대합니다</p>
                 <button class="btn" style="width:100%; margin-top:14px;" onclick="closeTooltip()">알겠습니다! 시작!</button>
+            </div>
+        </div>
+
+        <!-- 솔라패널 튜토리얼 오버레이 -->
+        <div id="sol-tooltip-overlay" class="overlay">
+            <div class="tooltip-box">
+                <h2>☀️ 솔라패널 각도 챌린지</h2>
+                <p>태양 위치를 보고 패널이 몇 도로<br>기울어져 있는지 맞혀야 합니다!</p>
+                <p>🔵 <strong>파란 패널 암</strong>의 각도를 읽으세요<br>☀️ <strong>태양 위치</strong>도 힌트가 됩니다</p>
+                <p class="tip-warn">⚠️ 오차 허용 단 <span style="font-size:22px; font-weight:900;">5°</span>!</p>
+                <p><strong style="color:#f1c40f;">[ − ]</strong> <strong style="color:#f1c40f;">[ + ]</strong> 버튼으로 각도를 고르고<br><strong style="color:#f1c40f;">확인!</strong> 을 눌러 제출하세요</p>
+                <p style="font-size:12px; color:#95a5a6;">총 10라운드 진행합니다</p>
+                <button class="btn" style="width:100%; margin-top:14px;" onclick="closeSolTooltip()">알겠습니다! 시작!</button>
             </div>
         </div>
 
@@ -529,7 +643,10 @@
         let clickCount = 0;
         let cutPositions = [];
 
+        let currentGame = 'bread';
+
         function loadCuttingGame() {
+            currentGame = 'bread';
             customerIndex = 1;
             satisfiedCount = 0;
             roundResults = [];
@@ -692,11 +809,12 @@
 
         function closeResult() {
             document.getElementById('result-overlay').classList.remove('show');
-            if (customerIndex >= 10) {
-                showFinalStats();
+            if (currentGame === 'solar') {
+                if (solCustomerIdx >= 10) showSolarFinalStats();
+                else { solCustomerIdx++; initSolarRound(); }
             } else {
-                customerIndex++;
-                initNextRound();
+                if (customerIndex >= 10) showFinalStats();
+                else { customerIndex++; initNextRound(); }
             }
         }
 
@@ -729,11 +847,225 @@
             changeScene('scene-select');
         }
 
-        // onclick 대신 pointerdown: 누르는 순간 즉시 발동 (50~100ms 단축)
         document.getElementById('btn-action').addEventListener('pointerdown', function(e) {
             e.preventDefault();
             handleCut();
         }, { passive: false });
+
+        // ── 솔라패널 게임 ──
+        // 15~80°, 1도 단위 (66개)
+        const solarAngles = Array.from({length: 66}, (_, i) => i + 15);
+        const solarScenarioTexts = [
+            '"이 패널, 몇 도로 설치된 건지 알아?"',
+            '"각도계 없이 눈대중으로 맞혀봐!"',
+            '"현장에서 각도 읽는 게 핵심이지!"',
+            '"태양 방향 보고 딱 맞혀야 해!"',
+            '"문동진, 각도 감각 한번 보여줘봐!"',
+            '"솔라 전문가라면 이 정도는 맞히지?"',
+        ];
+
+        let solCustomerIdx = 1, solSatisfied = 0, solResults = [];
+        let solTargetAngle = 0, solPrevAngle = 45;
+        let solSpinValue = 45;
+        let solSpinHeld = false, solSpinTimer = null;
+        let solAngleSequence = [];
+
+        function generateSolarSequence() {
+            const pool = solarAngles;
+            const seq = [];
+            let prev = null;
+            for (let i = 0; i < 10; i++) {
+                // 라운드 3·6·9(인덱스 2·5·8)는 30° 이상 급격한 변화 강제, 나머지는 최소 10° 차이
+                const minGap = (i > 0 && i % 3 === 2) ? 30 : 10;
+                let cands = pool.filter(a => prev === null || Math.abs(a - prev) >= minGap);
+                if (cands.length === 0) cands = pool.filter(a => a !== prev);
+                const pick = cands[Math.floor(Math.random() * cands.length)];
+                seq.push(pick);
+                prev = pick;
+            }
+            return seq;
+        }
+
+        function loadSolarGame() {
+            currentGame = 'solar';
+            solCustomerIdx = 1; solSatisfied = 0; solResults = [];
+            solPrevAngle = 45;
+            solAngleSequence = generateSolarSequence();
+            changeScene('scene-solar');
+            document.getElementById('sol-tooltip-overlay').classList.add('show');
+        }
+
+        function closeSolTooltip() {
+            document.getElementById('sol-tooltip-overlay').classList.remove('show');
+            initSolarRound();
+        }
+
+        function placeSun(angleDeg) {
+            const θ = angleDeg * Math.PI / 180;
+            const R = 120;
+            const pivotTop = 170; // solar-scene 230px - 암 bottom 60px
+            // 패널 수광면 법선: (-sinθ, cosθ) → 태양은 항상 패널 암 반대편 좌상단
+            const xOffset = -Math.round(R * Math.sin(θ));
+            const yOffset =  Math.round(R * Math.cos(θ));
+            const sun = document.getElementById('sol-sun');
+            sun.style.left = `calc(50% + ${xOffset}px)`;
+            sun.style.top = `${pivotTop - yOffset - 19}px`;
+        }
+
+        function initSolarRound() {
+            solTargetAngle = solAngleSequence[solCustomerIdx - 1];
+            const text = solarScenarioTexts[Math.floor(Math.random() * solarScenarioTexts.length)];
+
+            document.getElementById('sol-count').innerText = `라운드: ${solCustomerIdx} / 10`;
+            document.getElementById('sol-bubble').innerText = text;
+            document.getElementById('sol-angle-text').style.display = 'none';
+            document.getElementById('sol-guide-arm').style.display = 'none';
+
+            // 이전 각도에서 새 각도로 애니메이션
+            const arm = document.getElementById('sol-arm');
+            const sun = document.getElementById('sol-sun');
+            arm.style.transition = 'none';
+            sun.style.transition = 'none';
+            arm.style.transform = `rotate(${-solPrevAngle}deg)`;
+            placeSun(solPrevAngle);
+            arm.getBoundingClientRect(); // force reflow
+            arm.style.transition = '';
+            sun.style.transition = '';
+            arm.style.transform = `rotate(${-solTargetAngle}deg)`;
+            placeSun(solTargetAngle);
+            solPrevAngle = solTargetAngle;
+
+            // 스피너 초기화
+            solSpinValue = 45;
+            document.getElementById('sol-spin-val').innerText = solSpinValue;
+            document.getElementById('sol-spin-minus').disabled = false;
+            document.getElementById('sol-spin-plus').disabled = false;
+            document.getElementById('btn-solar-submit').disabled = false;
+            document.getElementById('btn-solar-submit').innerText = '확인!';
+        }
+
+        function solSpinStep(dir, step) {
+            solSpinValue = Math.max(0, Math.min(90, solSpinValue + dir * step));
+            document.getElementById('sol-spin-val').innerText = solSpinValue;
+        }
+
+        function solSpinStart(dir) {
+            solSpinHeld = true;
+            solSpinStep(dir, 1);
+            let ticks = 0;
+            function tick() {
+                if (!solSpinHeld) return;
+                ticks++;
+                solSpinStep(dir, ticks > 12 ? 5 : 1);
+                solSpinTimer = setTimeout(tick, ticks < 5 ? 250 : ticks < 12 ? 130 : 80);
+            }
+            solSpinTimer = setTimeout(tick, 300);
+        }
+
+        function solSpinStop() {
+            solSpinHeld = false;
+            clearTimeout(solSpinTimer);
+        }
+
+        function submitSolarAngle() {
+            const guess = solSpinValue;
+            document.getElementById('sol-spin-minus').disabled = true;
+            document.getElementById('sol-spin-plus').disabled = true;
+            document.getElementById('btn-solar-submit').disabled = true;
+            document.getElementById('btn-solar-submit').innerText = '⏳ 분석 중...';
+
+            // 암을 플레이어 추정 각도로 이동
+            document.getElementById('sol-arm').style.transform = `rotate(${-guess}deg)`;
+
+            // 0.6초 후 정답 가이드 암 표시
+            setTimeout(() => {
+                const guide = document.getElementById('sol-guide-arm');
+                guide.style.transform = `rotate(${-solTargetAngle}deg)`;
+                guide.style.display = 'block';
+                const txt = document.getElementById('sol-angle-text');
+                txt.innerText = `정답 ${solTargetAngle}°`;
+                txt.style.display = 'block';
+            }, 600);
+
+            setTimeout(() => evaluateSolar(guess), 2000);
+        }
+
+        function evaluateSolar(guess) {
+            const errorDeg = Math.abs(guess - solTargetAngle);
+            const isSatisfied = errorDeg <= 5;
+            if (isSatisfied) solSatisfied++;
+            solResults.push({ num: solCustomerIdx, target: solTargetAngle,
+                guess: guess, error: errorDeg, satisfied: isSatisfied });
+
+            let rating, color, desc;
+            if (errorDeg <= 2) {
+                rating = '🔆 완벽한 각도!'; color = '#2ecc71';
+                desc = `오차 단 ${errorDeg}°! 태양 에너지 100% 흡수!`;
+                SFX.perfect();
+            } else if (errorDeg <= 5) {
+                rating = '👍 훌륭한 조준!'; color = '#3498db';
+                desc = `오차 ${errorDeg}°! 발전 효율이 매우 높아요.`;
+                SFX.good();
+            } else if (errorDeg <= 10) {
+                rating = '아.. 아깝네요'; color = '#e67e22';
+                desc = `오차 ${errorDeg}°! 조금만 더 정확하게요.`;
+                SFX.close();
+            } else {
+                rating = '❌ 각도 실패'; color = '#e74c3c';
+                desc = `오차 ${errorDeg}°! 패널이 태양을 제대로 못 봐요!`;
+                SFX.fail();
+            }
+
+            document.getElementById('res-title').innerText = `라운드${solCustomerIdx} 채점 결과`;
+            document.getElementById('res-score').innerText = `내 답: ${guess}°  /  정답: ${solTargetAngle}°`;
+            document.getElementById('res-rating').innerText = rating;
+            document.getElementById('res-rating').style.color = color;
+            document.getElementById('res-desc').innerText = desc;
+            document.getElementById('btn-next-round').innerText =
+                solCustomerIdx >= 10 ? '최종 결과 보기 🏁' : '다음 라운드 ➡️';
+            document.getElementById('result-overlay').classList.add('show');
+        }
+
+        function showSolarFinalStats() {
+            SFX.fanfare();
+            document.getElementById('stat-ok').innerText = solSatisfied;
+            document.getElementById('stat-fail').innerText = 10 - solSatisfied;
+            let rank;
+            if      (solSatisfied >= 9) rank = '🌟 태양 에너지 마스터 문동진!';
+            else if (solSatisfied >= 7) rank = '☀️ 우수한 태양광 기사!';
+            else if (solSatisfied >= 5) rank = '👐 아직 수련이 필요해요';
+            else                        rank = '🌧️ 각도가 다 틀렸잖아요...<br><span style="font-size:14px;color:#bdc3c7;font-weight:normal;">태양은 어디 있는 건가요?</span>';
+            document.getElementById('final-rank').innerHTML = rank;
+            document.getElementById('round-list').innerHTML = solResults.map(r =>
+                `<div class="round-item ${r.satisfied ? 'round-ok' : 'round-fail'}">
+                    <span>${r.satisfied ? '✅' : '❌'} 라운드${r.num}</span>
+                    <span>정답 ${r.target}°</span>
+                    <span style="color:${r.satisfied ? '#2ecc71' : '#e74c3c'};">오차 ${r.error}°</span>
+                </div>`
+            ).join('');
+            document.getElementById('final-overlay').classList.add('show');
+        }
+
+        document.getElementById('btn-solar-submit').addEventListener('pointerdown', function(e) {
+            e.preventDefault();
+            submitSolarAngle();
+        }, { passive: false });
+
+        // 스피너 이벤트
+        (() => {
+            const minus = document.getElementById('sol-spin-minus');
+            const plus  = document.getElementById('sol-spin-plus');
+            minus.addEventListener('pointerdown', e => { e.preventDefault(); solSpinStart(-1); }, { passive: false });
+            plus.addEventListener('pointerdown',  e => { e.preventDefault(); solSpinStart(1);  }, { passive: false });
+            ['pointerup', 'pointercancel', 'pointerleave'].forEach(evt => {
+                minus.addEventListener(evt, solSpinStop);
+                plus.addEventListener(evt, solSpinStop);
+            });
+            document.getElementById('sol-spin-display').addEventListener('wheel', e => {
+                e.preventDefault();
+                solSpinStep(e.deltaY < 0 ? 1 : -1, 1);
+            }, { passive: false });
+        })();
     </script>
 </body>
 </html>
