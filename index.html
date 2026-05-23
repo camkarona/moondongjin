@@ -740,6 +740,14 @@
     </div>
 
     <script>
+        // ── 텔레그램 미니앱 스와이프-닫기 방지 ──
+        if (window.Telegram?.WebApp) {
+            const _wa = Telegram.WebApp;
+            _wa.expand();                                          // 전체 높이 확장
+            if (_wa.disableVerticalSwipes) _wa.disableVerticalSwipes(); // 수직 스와이프 잠금
+            if (_wa.requestFullscreen)     _wa.requestFullscreen();     // 풀스크린 (신버전)
+        }
+
         const bgm = document.getElementById('bgm');
         let bgmVol = 50;
         let sfxVol = 100;
@@ -1451,6 +1459,10 @@
             cvs.addEventListener('pointermove',   balOnMove,   { passive: false });
             cvs.addEventListener('pointerup',     balOnUp,     { passive: false });
             cvs.addEventListener('pointercancel', balOnUp,     { passive: false });
+
+            // 텔레그램 스와이프-닫기 방지: 캔버스 터치 이벤트도 직접 차단
+            cvs.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+            cvs.addEventListener('touchmove',  e => e.preventDefault(), { passive: false });
         }
 
         function balCvsPos(e) {
