@@ -642,7 +642,7 @@
                     <p>문동진이 유원지에 왔습니다! 🎡</p>
                     <p>다트를 던져서 풍선을 맞히세요.</p>
                     <p class="tip-warn">🎯 8개 이상을 목표로!</p>
-                    <p>풍선 <strong style="color:#f1c40f;">방향으로 밀어서</strong> 발사!<br>너무 오래 잡으면 손떨림으로<br>정확도가 떨어집니다.</p>
+                    <p>화면 어디든 <strong style="color:#f1c40f;">뒤로 당겨</strong> 조준 후 발사!<br>너무 오래 잡으면 손떨림으로<br>정확도가 떨어집니다.</p>
                     <p style="font-size:12px; color:#95a5a6;">총 10발의 다트</p>
                     <button class="btn" style="width:100%; margin-top:14px;" onclick="closeBalTooltip()">자, 다트 시작! 🎯</button>
                 </div>
@@ -1512,7 +1512,7 @@
                 const f = Math.min((aimMs - BAL.stableMs) / 1600, 1);
                 angleOff = (Math.random() * 2 - 1) * BAL.maxTrembleDeg * f * Math.PI / 180;
             }
-            const launchAngle = Math.atan2(pullY, pullX) + angleOff;
+            const launchAngle = Math.atan2(-pullY, -pullX) + angleOff;
             balDartPos = {
                 x: balSlingX, y: balSlingY,
                 vx: Math.cos(launchAngle) * power,
@@ -1622,7 +1622,7 @@
             if (balState === 'aiming' && balDrag.active) {
                 const _pX = balDrag.cx - balDrag.sx, _pY = balDrag.cy - balDrag.sy;
                 if (Math.sqrt(_pX*_pX + _pY*_pY) > 8) {
-                    dartAngle = Math.atan2(_pY, _pX);
+                    dartAngle = Math.atan2(-_pY, -_pX);
                 }
             }
             const dartInHand = (balState === 'idle' || balState === 'aiming');
@@ -1633,7 +1633,7 @@
                 if (dist > 8) {
                     const clamped = Math.min(dist, BAL.maxDrag), ratio = clamped/dist;
                     const power = clamped * BAL.powerScale;
-                    const launchAngle = Math.atan2(pullY, pullX);
+                    const launchAngle = Math.atan2(-pullY, -pullX);
                     const aimMs = performance.now() - balDrag.t0;
                     drawBalRubber(ctx, balSlingX, balSlingY, power, clamped);
                     if (aimMs < BAL.stableMs) {
@@ -1898,7 +1898,7 @@
                 // 메인 멘트 — 나무판자 짙은 색 (하늘에서 잘 보임)
                 ctx.fillStyle = '#4a2208';
                 ctx.font = 'bold 19px sans-serif';
-                ctx.fillText('풍선 방향으로 밀어서 발사!', balW/2, skyMidY);
+                ctx.fillText('화면 어디든 뒤로 당겨 조준, 발사!', balW/2, skyMidY);
                 // 경고 멘트 — 나무색보다 약간 연한 갈색
                 ctx.fillStyle = '#6b3810';
                 ctx.font = 'bold 13px sans-serif';
