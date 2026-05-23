@@ -450,6 +450,52 @@
             min-width: 60px; text-align: right; line-height: 1.1;
         }
         .sol-spin-unit { font-size: 26px; color: #f1c40f; font-weight: 900; }
+
+        /* ── 풍선 다트 게임 ── */
+        #scene-balloon {
+            background: linear-gradient(to bottom, #1a3a5c, #2980b9);
+            padding: 0; justify-content: flex-start; gap: 0;
+            padding-top: 6px;   /* 헤더와 캔버스 사이 여백 */
+        }
+        .bal-header {
+            width: 100%; padding: 10px 16px 8px;
+            background: rgba(0,0,0,0.28); flex-shrink: 0;
+        }
+        .bal-status {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 13px; font-weight: bold; color: rgba(255,255,255,0.92);
+            margin-bottom: 5px;
+        }
+        .bal-bubble {
+            background: rgba(255,255,255,0.13); border: 1px solid rgba(255,255,255,0.28);
+            border-radius: 12px; padding: 6px 12px;
+            font-size: 13px; color: rgba(255,255,255,0.88);
+            text-align: center; line-height: 1.4;
+        }
+        #bal-canvas {
+            flex: 1; width: 100%; display: block;
+            touch-action: none; cursor: crosshair;
+        }
+        .bal-footer {
+            width: 100%; padding: 7px 16px 10px;
+            background: rgba(0,0,0,0.28); flex-shrink: 0;
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+        }
+        .bal-instruction {
+            color: rgba(255,255,255,0.58); font-size: 13px; text-align: center;
+        }
+        /* 풍선 다트 포기 버튼 — 캔버스 위에 떠 있음 */
+        #bal-quit-btn {
+            position: absolute;
+            bottom: 14px;
+            left: 50%; transform: translateX(-50%);
+            width: 78%;
+            z-index: 5;
+            /* 나무/붉은 계열로 초록 잔디 배경에서 잘 보이게 */
+            background: rgba(110, 42, 12, 0.86) !important;
+            border: 1px solid rgba(210, 105, 40, 0.70) !important;
+            color: rgba(255, 215, 175, 0.96) !important;
+        }
     </style>
 </head>
 <body>
@@ -510,7 +556,7 @@
             <div style="width:100%; display:flex; flex-direction:column; align-items:center; gap:14px;">
                 <button class="btn btn-menu" onclick="loadCuttingGame()">🥐 소금빵 컷팅</button>
                 <button class="btn btn-menu" onclick="loadSolarGame()">☀️ 솔라 패널 각도 맞히기</button>
-                <button class="btn-locked" disabled>🔒 &nbsp; COMING SOON</button>
+                <button class="btn btn-menu" onclick="loadBalloonGame()">🎯 유원지 풍선 다트</button>
                 <button class="btn-locked" disabled>🔒 &nbsp; COMING SOON</button>
                 <button class="btn-locked" disabled>🔒 &nbsp; COMING SOON</button>
             </div>
@@ -570,6 +616,53 @@
                 </div>
                 <button id="btn-solar-submit" class="btn-cut" style="height:61px; width:100%;">확인!</button>
                 <button class="btn-quit-game" onclick="showQuit()">🏳️ 포기하기</button>
+            </div>
+        </div>
+
+        <!-- ⑤ 풍선 다트 게임 -->
+        <div id="scene-balloon" class="scene">
+            <div class="bal-header">
+                <div class="bal-status">
+                    <span id="bal-count">🎯 다트: 1 / 10</span>
+                    <span id="bal-popped-display">현재 0개 터뜨림</span>
+                </div>
+                <div id="bal-bubble" class="bal-bubble">다트를 던져서 풍선을 터뜨려라!</div>
+            </div>
+            <canvas id="bal-canvas"></canvas>
+            <!-- 포기하기 버튼 (캔버스 위에 절대 배치) -->
+            <button id="bal-quit-btn" class="btn-quit-game" onclick="showQuit()">🏳️ 포기하기</button>
+            <!-- 튜토리얼 오버레이 -->
+            <div id="bal-tooltip-overlay" class="overlay">
+                <div class="tooltip-box">
+                    <h2>🎯 유원지 풍선 다트</h2>
+                    <p>문동진이 유원지에 왔습니다! 🎡</p>
+                    <p>다트를 던져서 풍선을 맞히세요.</p>
+                    <p class="tip-warn">🎯 8개 이상을 목표로!</p>
+                    <p>화면 어디든 <strong style="color:#f1c40f;">뒤로 당겨</strong> 조준 후 발사!<br>너무 오래 잡으면 손떨림으로<br>정확도가 떨어집니다.</p>
+                    <p style="font-size:12px; color:#95a5a6;">총 10발의 다트</p>
+                    <button class="btn" style="width:100%; margin-top:14px;" onclick="closeBalTooltip()">자, 다트 시작! 🎯</button>
+                </div>
+            </div>
+            <!-- 라운드 결과 오버레이 -->
+            <div id="bal-result-overlay" class="overlay">
+                <div class="result-box">
+                    <div id="bal-res-title" class="result-title"></div>
+                    <div id="bal-res-score" class="score-display"></div>
+                    <div id="bal-res-rating" class="rating-text"></div>
+                    <p id="bal-res-desc" style="margin:10px 0 20px; font-size:14px; color:#ecf0f1; line-height:1.5;"></p>
+                    <button id="bal-next-btn" class="btn" style="width:100%;" onclick="nextBalRound()">다음 다트! ➡️</button>
+                </div>
+            </div>
+            <!-- 최종 결과 오버레이 -->
+            <div id="bal-final-overlay" class="overlay">
+                <div class="final-box">
+                    <div class="result-title">🎯 풍선 다트 결과!</div>
+                    <div id="bal-final-rank" class="rating-text" style="color:#f1c40f; margin:8px 0;"></div>
+                    <div id="bal-stat-hit" style="font-size:60px; font-weight:900; color:#2ecc71;"></div>
+                    <div style="color:rgba(255,255,255,0.7); font-size:16px; margin-bottom:12px;">/ 10개 풍선 터뜨림</div>
+                    <div id="bal-round-list" class="round-list"></div>
+                    <button class="btn" style="width:100%; margin-top:16px;" onclick="goToSelect()">처음으로 돌아가기</button>
+                </div>
             </div>
         </div>
 
@@ -726,6 +819,29 @@
                     g.gain.setValueAtTime(v(0.22), t);
                     g.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
                     osc.start(t); osc.stop(t + 0.52);
+                },
+                pop: () => {
+                    const c = get(), t = c.currentTime;
+                    const osc = c.createOscillator(), g = c.createGain();
+                    osc.connect(g); g.connect(c.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(320, t);
+                    osc.frequency.exponentialRampToValueAtTime(72, t + 0.14);
+                    g.gain.setValueAtTime(v(0.52), t);
+                    g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+                    osc.start(t); osc.stop(t + 0.16);
+                    const bufLen = Math.floor(c.sampleRate * 0.06);
+                    const buf = c.createBuffer(1, bufLen, c.sampleRate);
+                    const d = buf.getChannelData(0);
+                    for (let i = 0; i < bufLen; i++) d[i] = Math.random() * 2 - 1;
+                    const ns = c.createBufferSource(); ns.buffer = buf;
+                    const flt = c.createBiquadFilter();
+                    flt.type = 'bandpass'; flt.frequency.value = 1100; flt.Q.value = 0.9;
+                    const gn = c.createGain();
+                    ns.connect(flt); flt.connect(gn); gn.connect(c.destination);
+                    gn.gain.setValueAtTime(v(0.30), t);
+                    gn.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
+                    ns.start(t); ns.stop(t + 0.08);
                 },
                 fanfare: () => {
                     const c = get(), t = c.currentTime;
@@ -990,7 +1106,9 @@
         }
 
         function goToSelect() {
-            document.getElementById('final-overlay').classList.remove('show');
+            ['final-overlay','bal-final-overlay','bal-result-overlay','bal-tooltip-overlay']
+                .forEach(id => document.getElementById(id).classList.remove('show'));
+            if (balRafId) { cancelAnimationFrame(balRafId); balRafId = null; }
             changeScene('scene-select');
         }
 
@@ -1003,13 +1121,12 @@
         }
         function confirmQuit() {
             closeQuit();
-            // 빵 게임 애니메이션 중단
             isPlaying = false;
             cancelAnimationFrame(rafId);
-            // 솔라 스피너 중단
             solSpinStop();
-            // 열린 오버레이 전부 닫기
-            ['result-overlay','final-overlay','tooltip-overlay','sol-tooltip-overlay']
+            if (balRafId) { cancelAnimationFrame(balRafId); balRafId = null; }
+            ['result-overlay','final-overlay','tooltip-overlay','sol-tooltip-overlay',
+             'bal-result-overlay','bal-final-overlay','bal-tooltip-overlay']
                 .forEach(id => document.getElementById(id).classList.remove('show'));
             changeScene('scene-main');
         }
@@ -1233,6 +1350,601 @@
                 solSpinStep(e.deltaY < 0 ? 1 : -1, 1);
             }, { passive: false });
         })();
+
+        // ══════════════════════════════════════
+        // 🎯 풍선 다트 게임
+        // ══════════════════════════════════════
+        let balCanvas = null, balCtx = null;
+        let balW = 0, balH = 0;
+        let balBalloons = [];
+        let balDartRound = 1, balHitCount = 0, balResults = [];
+        let balState = 'idle'; // idle | aiming | flying | done
+        let balRafId = null;
+        let balPopParticles = [];
+        let balDrag = { active: false, sx: 0, sy: 0, cx: 0, cy: 0, t0: 0 };
+        let balDartPos = { x: 0, y: 0, vx: 0, vy: 0 };
+        let balSlingX = 0, balSlingY = 0, balBoardY = 0;
+        let balResultMsg = '', balResultSubMsg = '', balResultColor = '#fff';
+
+        const BAL = {
+            gravity: 0.30, maxDrag: 130, powerScale: 0.19,
+            minReleaseMs: 180, stableMs: 280,   // 떨림 시작 타이밍
+            maxTrembleDeg: 15, balloonR: 22
+        };
+        const BAL_COLORS = [
+            '#e74c3c','#e67e22','#f1c40f','#27ae60',
+            '#2980b9','#8e44ad','#16a085','#e91e63',
+            '#ff5722','#00bcd4','#8bc34a','#ff80ab'
+        ];
+        const BAL_BUBBLES = [
+            '다트를 던져서 풍선을 터뜨려라!',
+            '집중! 이번엔 꼭 맞혀봐!',
+            '할 수 있어, 문동진!',
+            '조금만 더 정확하게!',
+            '손 떨지 말고 차분하게!'
+        ];
+
+        function loadBalloonGame() {
+            currentGame = 'balloon';
+            balDartRound = 1; balHitCount = 0; balResults = [];
+            balState = 'idle'; balPopParticles = [];
+            balResultMsg = ''; balResultSubMsg = '';
+            if (balRafId) { cancelAnimationFrame(balRafId); balRafId = null; }
+            changeScene('scene-balloon');
+            document.getElementById('bal-tooltip-overlay').classList.add('show');
+        }
+
+        function closeBalTooltip() {
+            document.getElementById('bal-tooltip-overlay').classList.remove('show');
+            requestAnimationFrame(() => {
+                balCanvas = document.getElementById('bal-canvas');
+                balCtx = balCanvas.getContext('2d');
+                const rect = balCanvas.getBoundingClientRect();
+                balW = Math.round(rect.width);
+                balH = Math.round(rect.height);
+                balCanvas.width = balW; balCanvas.height = balH;
+                balSlingX = balW / 2;
+                balSlingY = Math.round(balH * 0.76); // 화면 하단에서 24% 위 — 스크롤 방지
+                initBalBalloons(); setupBalEvents(); updateBalUI();
+                balRafId = requestAnimationFrame(balLoop);
+            });
+        }
+
+        function initBalBalloons() {
+            balBalloons = [];
+            // 크기: 대(28)×4, 중(20)×3, 소(13)×3 = 총 10개
+            const sizePool = [28,28,28,28, 20,20,20, 13,13,13];
+            // 셔플
+            for (let i = sizePool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [sizePool[i], sizePool[j]] = [sizePool[j], sizePool[i]];
+            }
+            // 4-3-3 행 배치
+            const rowCounts = [4, 3, 3];
+            const padX = 28, startY = 52;
+            const spY = Math.min(88, (balH * 0.52) / rowCounts.length);
+            const maxRY = Math.round(28 * 1.18); // 가장 큰 풍선 기준 보드 높이
+            balBoardY = startY + (rowCounts.length - 1) * spY + maxRY + 28;
+            let si = 0;
+            for (let r = 0; r < rowCounts.length; r++) {
+                const cnt = rowCounts[r];
+                const spX = (balW - padX * 2) / (cnt - 1);
+                for (let c = 0; c < cnt; c++) {
+                    balBalloons.push({
+                        x: padX + c * spX + (Math.random() - 0.5) * 16,
+                        y: startY + r * spY + (Math.random() - 0.5) * 14,
+                        r: sizePool[si++],
+                        color: BAL_COLORS[(r * 4 + c) % BAL_COLORS.length],
+                        popped: false
+                    });
+                }
+            }
+        }
+
+        function setupBalEvents() {
+            const cvs = balCanvas;
+            cvs.removeEventListener('pointerdown', balOnDown);
+            cvs.removeEventListener('pointermove', balOnMove);
+            cvs.removeEventListener('pointerup',   balOnUp);
+            cvs.removeEventListener('pointercancel', balOnUp);
+            cvs.addEventListener('pointerdown',   balOnDown,   { passive: false });
+            cvs.addEventListener('pointermove',   balOnMove,   { passive: false });
+            cvs.addEventListener('pointerup',     balOnUp,     { passive: false });
+            cvs.addEventListener('pointercancel', balOnUp,     { passive: false });
+        }
+
+        function balCvsPos(e) {
+            const rect = balCanvas.getBoundingClientRect();
+            return {
+                x: (e.clientX - rect.left) * (balW / rect.width),
+                y: (e.clientY - rect.top)  * (balH / rect.height)
+            };
+        }
+
+        function balOnDown(e) {
+            if (balState !== 'idle') return;
+            e.preventDefault();
+            const p = balCvsPos(e);
+            balDrag = { active: true, sx: p.x, sy: p.y, cx: p.x, cy: p.y, t0: performance.now() };
+            balState = 'aiming';
+            balCanvas.setPointerCapture(e.pointerId);
+        }
+        function balOnMove(e) {
+            if (!balDrag.active) return;
+            e.preventDefault();
+            const p = balCvsPos(e);
+            balDrag.cx = p.x; balDrag.cy = p.y;
+        }
+        function balOnUp(e) {
+            if (!balDrag.active || balState !== 'aiming') return;
+            e.preventDefault();
+            balDrag.active = false;
+            const aimMs = performance.now() - balDrag.t0;
+            const pullX = balDrag.cx - balDrag.sx;
+            const pullY = balDrag.cy - balDrag.sy;
+            const dist = Math.sqrt(pullX * pullX + pullY * pullY);
+            if (dist < 10) { balState = 'idle'; return; }
+            const clamped = Math.min(dist, BAL.maxDrag);
+            const power = clamped * BAL.powerScale;
+            let angleOff = 0;
+            if (aimMs > BAL.stableMs) {
+                const f = Math.min((aimMs - BAL.stableMs) / 1600, 1);
+                angleOff = (Math.random() * 2 - 1) * BAL.maxTrembleDeg * f * Math.PI / 180;
+            }
+            const launchAngle = Math.atan2(-pullY, -pullX) + angleOff;
+            balDartPos = {
+                x: balSlingX, y: balSlingY,
+                vx: Math.cos(launchAngle) * power,
+                vy: Math.sin(launchAngle) * power
+            };
+            balState = 'flying';
+        }
+
+        function balLoop() {
+            balRafId = requestAnimationFrame(balLoop);
+            balPhysics(); balRender();
+        }
+
+        function balPhysics() {
+            for (let i = balPopParticles.length - 1; i >= 0; i--) {
+                const p = balPopParticles[i];
+                p.x += p.vx; p.y += p.vy; p.vy += 0.2;
+                p.life -= 2; p.r *= 0.96;
+                if (p.life <= 0) balPopParticles.splice(i, 1);
+            }
+            if (balState !== 'flying') return;
+            balDartPos.vy += BAL.gravity;
+            balDartPos.x += balDartPos.vx; balDartPos.y += balDartPos.vy;
+            for (const b of balBalloons) {
+                if (b.popped) continue;
+                const dx = balDartPos.x - b.x, dy = balDartPos.y - b.y;
+                const hrx = b.r * 0.82 + 4, hry = b.r * 1.18 + 4; // 타원 충돌 반경
+                if ((dx*dx)/(hrx*hrx) + (dy*dy)/(hry*hry) < 1) {
+                    b.popped = true; balHitCount++;
+                    spawnPop(b); SFX.pop();
+                    balState = 'done';
+                    balResults.push({ round: balDartRound, hit: true });
+                    balResultMsg = '💥 명중!';
+                    balResultSubMsg = `현재 ${balHitCount}개 터뜨림  |  남은 다트 ${10 - balDartRound}발`;
+                    balResultColor = '#f1c40f';
+                    updateBalUI();
+                    setTimeout(() => {
+                        if (balDartRound >= 10 || balBalloons.every(b2 => b2.popped)) showBalFinal();
+                        else nextBalRound();
+                    }, 1600);
+                    return;
+                }
+            }
+            if (balDartPos.x < -80 || balDartPos.x > balW+80 ||
+                balDartPos.y > balH+80 || balDartPos.y < -250) {
+                balState = 'done'; SFX.fail();
+                balResults.push({ round: balDartRound, hit: false });
+                balResultMsg = '😅 빗나갔다!';
+                balResultSubMsg = `현재 ${balHitCount}개 터뜨림  |  남은 다트 ${10 - balDartRound}발`;
+                balResultColor = '#e67e22';
+                updateBalUI();
+                setTimeout(() => {
+                    if (balDartRound >= 10 || balBalloons.every(b2 => b2.popped)) showBalFinal();
+                    else nextBalRound();
+                }, 1300);
+            }
+        }
+
+        function spawnPop(b) {
+            for (let i = 0; i < 16; i++) {
+                const ang = Math.random() * Math.PI * 2, spd = 2 + Math.random() * 5;
+                balPopParticles.push({
+                    x: b.x, y: b.y,
+                    vx: Math.cos(ang)*spd, vy: Math.sin(ang)*spd - 2,
+                    r: 4 + Math.random() * 6, color: b.color,
+                    life: 60 + Math.random() * 40
+                });
+            }
+        }
+
+        function balRender() {
+            const ctx = balCtx;
+            ctx.clearRect(0, 0, balW, balH);
+            const sky = ctx.createLinearGradient(0,0,0,balH);
+            sky.addColorStop(0,'#4fc3f7'); sky.addColorStop(0.78,'#b3e5fc'); sky.addColorStop(1,'#81c784');
+            ctx.fillStyle = sky; ctx.fillRect(0,0,balW,balH);
+            drawCloud(ctx, balW*0.14, balH*0.10, 34);
+            drawCloud(ctx, balW*0.72, balH*0.07, 27);
+            drawCloud(ctx, balW*0.47, balH*0.17, 20);
+            ctx.fillStyle='#66bb6a'; ctx.fillRect(0,balH-30,balW,30);
+            ctx.fillStyle='#81c784'; ctx.fillRect(0,balH-34,balW,6);
+            drawBalloonBoard(ctx);
+            balBalloons.forEach(b => { if (!b.popped) drawBalBalloon(ctx, b); });
+            balPopParticles.forEach(p => {
+                const alpha = Math.max(0, p.life / 100);
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, Math.max(0.1,p.r), 0, Math.PI*2);
+                ctx.fillStyle = p.color + Math.floor(alpha*255).toString(16).padStart(2,'0');
+                ctx.fill();
+            });
+            // 다트 흔들림 — 조준 시간에 따라 다트가 물리적으로 떨림
+            let dartSX = balSlingX, dartSY = balSlingY;
+            if (balState === 'aiming' && balDrag.active) {
+                const _t = (performance.now() - balDrag.t0) / 1000;
+                const _ms = _t * 1000;
+                if (_ms > BAL.stableMs) {
+                    const _f = Math.min((_ms - BAL.stableMs) / 1400, 1);
+                    dartSX += Math.sin(_t * 12.5) * _f * 10;
+                    dartSY += Math.cos(_t * 9.5)  * _f * 7;
+                } else {
+                    dartSX += Math.sin(_t * 5.2) * 1.0;
+                    dartSY += Math.cos(_t * 4.0) * 0.8;
+                }
+            }
+            // 조준 방향에 따른 다트 각도 (idle: 위, aiming: 발사 방향)
+            let dartAngle = -Math.PI / 2;
+            if (balState === 'aiming' && balDrag.active) {
+                const _pX = balDrag.cx - balDrag.sx, _pY = balDrag.cy - balDrag.sy;
+                if (Math.sqrt(_pX*_pX + _pY*_pY) > 8) {
+                    dartAngle = Math.atan2(-_pY, -_pX);
+                }
+            }
+            const dartInHand = (balState === 'idle' || balState === 'aiming');
+            drawBalSling(ctx, dartSX, dartSY, dartInHand, dartAngle);
+            if (balState === 'aiming' && balDrag.active) {
+                const pullX = balDrag.cx - balDrag.sx, pullY = balDrag.cy - balDrag.sy;
+                const dist = Math.sqrt(pullX*pullX+pullY*pullY);
+                if (dist > 8) {
+                    const clamped = Math.min(dist, BAL.maxDrag), ratio = clamped/dist;
+                    const power = clamped * BAL.powerScale;
+                    const launchAngle = Math.atan2(-pullY, -pullX);
+                    const aimMs = performance.now() - balDrag.t0;
+                    drawBalRubber(ctx, balSlingX, balSlingY, power, clamped);
+                    if (aimMs < BAL.stableMs) {
+                        // 안정 상태 — 흰색 점선 + 끝 화살표
+                        drawTraj(ctx, balSlingX, balSlingY,
+                            Math.cos(launchAngle)*power, Math.sin(launchAngle)*power,
+                            'rgba(255,255,255,0.85)', 2, [6,4], 176, true);
+                    } else {
+                        // 손떨림 상태 — 부채꼴 퍼짐 + 중심 화살표 점점 흐려짐
+                        const f = Math.min((aimMs-BAL.stableMs)/1600, 1);
+                        const spread = BAL.maxTrembleDeg*f*Math.PI/180;
+                        // 팬 라인: f 클수록 선명해지고, 각각의 끝에 화살표도 복제됨
+                        for (let i=-4; i<=4; i++) {
+                            const a = launchAngle+(i/4)*spread;
+                            const baseAlp = 0.06+(1-Math.abs(i/4))*0.15;
+                            const alp = Math.min(baseAlp*(1+f*2.0), 0.55).toFixed(2);
+                            // f가 커질수록 바깥 화살표도 등장 — 중심(i=0)은 항상, 외곽은 f 임계값 넘으면
+                            const showFanArrow = Math.abs(i/4) < f;
+                            drawTraj(ctx,balSlingX,balSlingY,Math.cos(a)*power,Math.sin(a)*power,
+                                `rgba(255,80,80,${alp})`,1.5,[], 176, showFanArrow);
+                        }
+                        // 중심 화살표: f 클수록 흐려지고 가늘어짐
+                        const centerAlpha = Math.max(0.18, 0.82 - f * 0.64).toFixed(2);
+                        const centerW = Math.max(1.0, 2.2 - f * 1.2);
+                        drawTraj(ctx,balSlingX,balSlingY,
+                            Math.cos(launchAngle)*power,Math.sin(launchAngle)*power,
+                            `rgba(255,50,50,${centerAlpha})`,centerW,[4,4], 176, true);
+                    }
+                }
+            }
+            if (balState === 'flying') {
+                drawBalDart(ctx, balDartPos.x, balDartPos.y,
+                    Math.atan2(balDartPos.vy, balDartPos.vx));
+            }
+            drawBalCanvasUI(ctx);
+        }
+
+        function drawBalloonBoard(ctx) {
+            if (!balBoardY) return;
+            const top = 0, bot = balBoardY, pad = 4;
+            // 나무판 메인
+            const wood = ctx.createLinearGradient(0, top, 0, bot);
+            wood.addColorStop(0, '#d4aa6e'); wood.addColorStop(0.4, '#b8884a');
+            wood.addColorStop(0.7, '#c8a05a'); wood.addColorStop(1, '#9a6830');
+            ctx.beginPath();
+            ctx.rect(pad, top, balW - pad*2, bot - top);
+            ctx.fillStyle = wood; ctx.fill();
+            ctx.strokeStyle = '#7a5228'; ctx.lineWidth = 2.5; ctx.stroke();
+            // 나뭇결 가로선
+            ctx.strokeStyle = 'rgba(0,0,0,0.07)'; ctx.lineWidth = 1;
+            for (let i = 1; i <= 5; i++) {
+                const gy = top + (bot - top) * i / 6;
+                ctx.beginPath(); ctx.moveTo(pad, gy); ctx.lineTo(balW-pad, gy); ctx.stroke();
+            }
+            // 하단 두꺼운 테두리 (프레임)
+            ctx.fillStyle = '#6b4520';
+            ctx.fillRect(pad, bot - 7, balW - pad*2, 7);
+            // 상단 프레임
+            ctx.fillStyle = '#a07038';
+            ctx.fillRect(pad, top, balW - pad*2, 5);
+        }
+
+        function drawCloud(ctx, x, y, r) {
+            ctx.fillStyle='rgba(255,255,255,0.78)';
+            [[0,0,1],[0.7,0.35,0.72],[-0.62,0.35,0.65]].forEach(([ox,oy,sr])=>{
+                ctx.beginPath(); ctx.arc(x+ox*r,y+oy*r,r*sr,0,Math.PI*2); ctx.fill();
+            });
+        }
+
+        function drawBalBalloon(ctx, b) {
+            const rx = b.r * 0.82, ry = b.r * 1.18; // 타원형: 가로 좁고 세로 길게
+            // 풍선 몸통 (타원)
+            ctx.beginPath(); ctx.ellipse(b.x, b.y, rx, ry, 0, 0, Math.PI*2);
+            ctx.fillStyle = b.color; ctx.fill();
+            ctx.strokeStyle = 'rgba(0,0,0,0.20)'; ctx.lineWidth = 1.5; ctx.stroke();
+            // 하이라이트 (상단 좌측)
+            ctx.beginPath(); ctx.ellipse(b.x - rx*0.28, b.y - ry*0.28, rx*0.24, ry*0.18, -0.3, 0, Math.PI*2);
+            ctx.fillStyle = 'rgba(255,255,255,0.52)'; ctx.fill();
+            // 매듭 (아래)
+            ctx.beginPath(); ctx.arc(b.x, b.y + ry - 2, 4, 0, Math.PI*2);
+            ctx.fillStyle = balDarken(b.color, 40); ctx.fill();
+            // 핀 (나무판에 고정)
+            ctx.beginPath(); ctx.arc(b.x, b.y + ry + 3, 4, 0, Math.PI*2);
+            ctx.fillStyle = '#d0d0d0'; ctx.fill();
+            ctx.strokeStyle = '#888'; ctx.lineWidth = 1; ctx.stroke();
+            ctx.beginPath(); ctx.arc(b.x, b.y + ry + 3, 2, 0, Math.PI*2);
+            ctx.fillStyle = '#fff'; ctx.fill();
+        }
+        function balDarken(hex,amt) {
+            return `rgb(${[1,3,5].map(o=>Math.max(0,parseInt(hex.slice(o,o+2),16)-amt)).join(',')})`;
+        }
+
+        // 실제 다트 형태 그리기 (팁→배럴→샤프트→플라이트)
+        // cx,cy = 배럴 중심, angle = 팁이 향하는 방향 (0 = 오른쪽)
+        function drawRealDart(ctx, cx, cy, angle) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(angle);
+            // 로컬 좌표: 팁이 +x방향, 플라이트가 -x방향
+
+            // ── 니들(바늘) ──
+            ctx.fillStyle = '#111';
+            ctx.beginPath();
+            ctx.moveTo(34, 0);
+            ctx.lineTo(14, -1.6); ctx.lineTo(14, 1.6);
+            ctx.closePath(); ctx.fill();
+
+            // ── 배럴 전면 테이퍼 ──
+            ctx.fillStyle = '#b0b0b0';
+            ctx.beginPath();
+            ctx.moveTo(14, -1.6); ctx.lineTo(14, 1.6);
+            ctx.lineTo(8, 4); ctx.lineTo(8, -4);
+            ctx.closePath(); ctx.fill();
+
+            // ── 배럴 메인 (메탈릭 그라디언트) ──
+            const bg = ctx.createLinearGradient(0, -5, 0, 5);
+            bg.addColorStop(0,   '#5a5a5a');
+            bg.addColorStop(0.25,'#f2f2f2');
+            bg.addColorStop(0.6, '#c0c0c0');
+            bg.addColorStop(1,   '#4a4a4a');
+            ctx.fillStyle = bg;
+            ctx.fillRect(-8, -5, 16, 10);
+
+            // 너링(knurling) 세로선
+            ctx.strokeStyle = 'rgba(0,0,0,0.22)'; ctx.lineWidth = 0.9;
+            for (let rx = 6; rx >= -6; rx -= 2.5) {
+                ctx.beginPath(); ctx.moveTo(rx, -5); ctx.lineTo(rx, 5); ctx.stroke();
+            }
+            ctx.strokeStyle = 'rgba(0,0,0,0.18)'; ctx.lineWidth = 0.8;
+            ctx.strokeRect(-8, -5, 16, 10);
+
+            // ── 샤프트 (가늘고 검정) ──
+            ctx.fillStyle = '#151515';
+            ctx.fillRect(-20, -2, 12, 4);
+
+            // ── 플라이트(날개) — 오렌지 삼각형 2개 ──
+            ctx.fillStyle = '#e07000';
+            // 위 날개
+            ctx.beginPath();
+            ctx.moveTo(-20, -1.5);
+            ctx.lineTo(-38, -15);
+            ctx.lineTo(-33, -4);
+            ctx.closePath(); ctx.fill();
+            ctx.strokeStyle = '#8a3a00'; ctx.lineWidth = 0.7; ctx.stroke();
+            // 아래 날개
+            ctx.beginPath();
+            ctx.moveTo(-20, 1.5);
+            ctx.lineTo(-38, 15);
+            ctx.lineTo(-33, 4);
+            ctx.closePath(); ctx.fill();
+            ctx.strokeStyle = '#8a3a00'; ctx.lineWidth = 0.7; ctx.stroke();
+
+            // 중심선 (샤프트~플라이트 경계)
+            ctx.strokeStyle = '#111'; ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.moveTo(-20, 0); ctx.lineTo(-38, 0); ctx.stroke();
+
+            ctx.restore();
+        }
+
+        // 대기/조준 중 다트 — angle 방향으로 회전 (기본: 위를 향함)
+        function drawBalSling(ctx, x, y, dartVisible, angle = -Math.PI / 2) {
+            if (!dartVisible) return;
+            drawRealDart(ctx, x, y, angle);
+        }
+
+        function drawBalRubber(ctx, sx, sy, power, dist) {
+            // 세로 파워 게이지 (클래식 게임 스타일)
+            const ratio = Math.min(dist / BAL.maxDrag, 1);
+            const barH = 110, barW = 14;
+            const bx = Math.min(sx + 55, balW - 22); // 손 우측, 화면 밖 방지
+            const by = sy + 10; // 게이지 하단
+
+            // 배경 패널
+            ctx.fillStyle = 'rgba(0,0,0,0.55)';
+            ctx.fillRect(bx - barW/2 - 3, by - barH - 14, barW + 6, barH + 18);
+
+            // 'POWER' 라벨
+            ctx.fillStyle = 'rgba(255,255,255,0.82)';
+            ctx.font = 'bold 8px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText('POWER', bx, by - barH - 4);
+
+            // 빈 게이지 바 배경
+            ctx.fillStyle = 'rgba(30,30,30,0.85)';
+            ctx.fillRect(bx - barW/2, by - barH, barW, barH);
+
+            // 채워지는 게이지 (초록 → 노랑 → 빨강)
+            const fillH = barH * ratio;
+            if (fillH > 0.5) {
+                const grad = ctx.createLinearGradient(0, by, 0, by - barH);
+                grad.addColorStop(0,   '#27ae60');
+                grad.addColorStop(0.5, '#f1c40f');
+                grad.addColorStop(1,   '#e74c3c');
+                ctx.fillStyle = grad;
+                ctx.fillRect(bx - barW/2, by - fillH, barW, fillH);
+            }
+
+            // 게이지 테두리
+            ctx.strokeStyle = 'rgba(255,255,255,0.65)';
+            ctx.lineWidth = 1.5; ctx.setLineDash([]);
+            ctx.strokeRect(bx - barW/2, by - barH, barW, barH);
+
+            // 25 / 50 / 75% 눈금선
+            [0.25, 0.5, 0.75].forEach(t => {
+                const ty = by - barH * t;
+                ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(bx - barW/2 - 4, ty); ctx.lineTo(bx + barW/2 + 4, ty); ctx.stroke();
+            });
+
+            // 퍼센트 숫자
+            if (ratio > 0.08) {
+                const rr = Math.floor(255 * ratio), gg = Math.floor(200 * (1 - ratio));
+                ctx.fillStyle = `rgb(${rr},${gg},20)`;
+                ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText(`${Math.round(ratio * 100)}%`, bx, by + 13);
+            }
+        }
+
+        function drawTraj(ctx, x0, y0, vx, vy, color, width, dash, maxDist = 176, showArrow = false) {
+            ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = width;
+            ctx.setLineDash(dash); ctx.moveTo(x0, y0);
+            let x=x0, y=y0, dvx=vx, dvy=vy;
+            let lx=x0, ly=y0, prevLx=x0, prevLy=y0, moved=false;
+            for (let i=0; i<55; i++) {
+                dvy += BAL.gravity;
+                const nx=x+dvx, ny=y+dvy;
+                // 범위 초과 or 최대 거리 초과 시 중단 (lx,ly 갱신하지 않음)
+                if (ny>balH+10||nx<-30||nx>balW+30||Math.hypot(nx-x0,ny-y0)>maxDist) break;
+                prevLx=lx; prevLy=ly;   // 이전 점 백업
+                lx=nx; ly=ny;           // 현재 점 갱신
+                x=nx; y=ny;
+                ctx.lineTo(lx, ly);
+                moved = true;
+            }
+            ctx.stroke(); ctx.setLineDash([]);
+            // 끝점 화살표 — prevLx/ly와 lx/ly가 다를 때만 올바른 방향 계산
+            if (showArrow && moved && (lx !== prevLx || ly !== prevLy)) {
+                const ang = Math.atan2(ly - prevLy, lx - prevLx);
+                const al = 11;
+                ctx.beginPath();
+                ctx.moveTo(lx, ly);
+                ctx.lineTo(lx - al*Math.cos(ang-0.42), ly - al*Math.sin(ang-0.42));
+                ctx.lineTo(lx - al*Math.cos(ang+0.42), ly - al*Math.sin(ang+0.42));
+                ctx.closePath();
+                ctx.fillStyle = color; ctx.setLineDash([]);
+                ctx.fill();
+            }
+        }
+
+        // 날아가는 다트 — 속도 방향으로 회전
+        function drawBalDart(ctx, x, y, angle) {
+            drawRealDart(ctx, x, y, angle);
+        }
+
+        function drawBalCanvasUI(ctx) {
+            if (!balBoardY || !balSlingY) return;
+            // 하늘 영역 (나무판 아래 ~ 발사 지점 사이) 중간
+            const skyMidY = balBoardY + (balSlingY - balBoardY) * 0.45;
+            ctx.textAlign = 'center';
+            ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
+
+            if (balState === 'idle') {
+                // 메인 멘트 — 나무판자 짙은 색 (하늘에서 잘 보임)
+                ctx.fillStyle = '#4a2208';
+                ctx.font = 'bold 19px sans-serif';
+                ctx.fillText('화면 어디든 뒤로 당겨 조준, 발사!', balW/2, skyMidY);
+                // 경고 멘트 — 나무색보다 약간 연한 갈색
+                ctx.fillStyle = '#6b3810';
+                ctx.font = 'bold 13px sans-serif';
+                ctx.fillText('너무 오래 잡으면 손떨림으로 정확도가 떨어집니다.', balW/2, skyMidY + 26);
+            } else if (balState === 'done' && balResultMsg) {
+                ctx.shadowColor = 'rgba(0,0,0,0.85)'; ctx.shadowBlur = 8;
+                ctx.font = 'bold 28px sans-serif';
+                ctx.fillStyle = balResultColor;
+                ctx.fillText(balResultMsg, balW/2, skyMidY - 6);
+                ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.88)';
+                ctx.fillText(balResultSubMsg, balW/2, skyMidY + 24);
+            }
+        }
+
+        function updateBalUI() {
+            document.getElementById('bal-count').textContent = `🎯 다트: ${balDartRound} / 10`;
+            document.getElementById('bal-popped-display').innerHTML = `현재 <span style="color:#f1c40f;font-weight:900;">${balHitCount}</span>개 터뜨림`;
+            document.getElementById('bal-bubble').textContent =
+                BAL_BUBBLES[(balDartRound - 1) % BAL_BUBBLES.length];
+        }
+
+        function showBalResult(hit) {
+            document.getElementById('bal-res-title').textContent = hit ? '💥 명중!' : '😅 빗나갔다!';
+            document.getElementById('bal-res-title').style.color = hit ? '#f1c40f' : '#e74c3c';
+            document.getElementById('bal-res-score').textContent =
+                hit ? '풍선 터뜨림! 🎈' : '아쉽게 빗나갔습니다 😭';
+            document.getElementById('bal-res-rating').textContent =
+                `현재 ${balHitCount}개 터뜨림  |  남은 다트 ${10 - balDartRound}발`;
+            document.getElementById('bal-res-rating').style.color = hit ? '#2ecc71' : '#e67e22';
+            document.getElementById('bal-res-desc').textContent = hit
+                ? `${balDartRound}번째 다트 — 정확한 조준으로 터뜨렸습니다!`
+                : `${balDartRound}번째 다트 — 이번엔 빗나갔어요. 다음엔 더 잘 할 수 있어!`;
+            const isLast = balDartRound >= 10 || balBalloons.every(b => b.popped);
+            const btn = document.getElementById('bal-next-btn');
+            btn.textContent = isLast ? '최종 결과 보기 🏁' : '다음 다트! ➡️';
+            btn.onclick = isLast ? showBalFinal : nextBalRound;
+            document.getElementById('bal-result-overlay').classList.add('show');
+        }
+
+        function nextBalRound() {
+            balDartRound++;
+            balResultMsg = ''; balResultSubMsg = '';
+            balState = 'idle'; updateBalUI();
+        }
+
+        function showBalFinal() {
+            document.getElementById('bal-result-overlay').classList.remove('show');
+            if (balRafId) { cancelAnimationFrame(balRafId); balRafId = null; }
+            SFX.fanfare();
+            let rank;
+            if      (balHitCount >= 10) rank = '🏆 다트 마스터 문동진!';
+            else if (balHitCount >= 8)  rank = '🥇 훌륭해! 엄청난 정확도!';
+            else if (balHitCount >= 6)  rank = '🥈 잘했는데.. 사은품은 못탔어';
+            else if (balHitCount >= 4)  rank = '🥉 아쉽다... 다시 도전!';
+            else                        rank = '😅 많이 빗나갔어요...';
+            document.getElementById('bal-final-rank').textContent = rank;
+            document.getElementById('bal-stat-hit').textContent = balHitCount;
+            document.getElementById('bal-round-list').innerHTML = balResults.map(r =>
+                `<div class="round-item ${r.hit ? 'round-ok' : 'round-fail'}">
+                    <span>${r.hit ? '💥' : '❌'} ${r.round}번째 다트</span>
+                    <span style="color:${r.hit?'#2ecc71':'#e74c3c'};">${r.hit?'명중!':'빗나감'}</span>
+                 </div>`
+            ).join('');
+            document.getElementById('bal-final-overlay').classList.add('show');
+        }
     </script>
 </body>
 </html>
