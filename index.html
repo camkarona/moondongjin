@@ -2140,7 +2140,7 @@
             let rank;
             if      (balHitCount >= 10) rank = '🏆 다트 마스터 문동진!';
             else if (balHitCount >= 8)  rank = '🥇 훌륭해! 엄청난 정확도!';
-            else if (balHitCount >= 6)  rank = '🥈 잘했는데.. 사은품은 못탔어';
+            else if (balHitCount >= 6)  rank = '🥈 잘했는데 상품은 못탔어...';
             else if (balHitCount >= 4)  rank = '🥉 아쉽다... 다시 도전!';
             else                        rank = '😅 많이 빗나갔어요...';
             document.getElementById('bal-final-rank').textContent = rank;
@@ -2171,191 +2171,252 @@
         // hitAt (ms from panel start when note center reaches hit zone),
         // barMs (duration in ms, only for bar notes)
         const BOLT_PATTERNS = [
-            // ROUND 1 — ×1.00 | 9노트 | 기본 번갈아 560ms
-            // 첫 노트: 패널 시작 후 화면 맨 위에서 진입
+            // ══ ROUND 1 — ×1.00 | 10노트 ══
+            // 기본이지만 좌좌우 / 우좌좌 등 군집 패턴으로 쉬운 변화 시작
             { name:'ROUND 1', notes:[
+                // 좌좌 우
                 {lane:0, type:'circle', hitAt:1500},
-                {lane:1, type:'circle', hitAt:2060},
-                {lane:0, type:'circle', hitAt:2620},
-                {lane:1, type:'circle', hitAt:3180},
-                {lane:0, type:'circle', hitAt:3740},
-                {lane:1, type:'circle', hitAt:4300},
-                {lane:0, type:'circle', hitAt:4860},
-                {lane:1, type:'circle', hitAt:5420},
-                {lane:0, type:'circle', hitAt:5980},
+                {lane:0, type:'circle', hitAt:2000}, // 좌좌
+                {lane:1, type:'circle', hitAt:2550}, // 우
+                // 우우 좌
+                {lane:1, type:'circle', hitAt:3150},
+                {lane:1, type:'circle', hitAt:3650}, // 우우
+                {lane:0, type:'circle', hitAt:4200}, // 좌
+                // 좌 우 좌
+                {lane:0, type:'circle', hitAt:4900},
+                {lane:1, type:'circle', hitAt:5500},
+                {lane:0, type:'circle', hitAt:6100},
+                // 우우
+                {lane:1, type:'circle', hitAt:6800},
             ]},
-            // ROUND 2 — ×1.08 | 10노트 | 번갈아 500ms + 동시탭 2쌍
+            // ══ ROUND 2 — ×1.08 | 11노트 ══
+            // 좌좌좌 우 / 우우우 좌 + 동시탭
             { name:'ROUND 2', notes:[
+                // 좌좌좌 (450ms)
                 {lane:0, type:'circle', hitAt:1400},
-                {lane:1, type:'circle', hitAt:1900},
-                {lane:0, type:'circle', hitAt:2400},
-                {lane:1, type:'circle', hitAt:2900},
-                {lane:0, type:'circle', hitAt:3400}, {lane:1, type:'circle', hitAt:3400}, // 동시
-                {lane:0, type:'circle', hitAt:4200},
-                {lane:1, type:'circle', hitAt:4700},
-                {lane:0, type:'circle', hitAt:5200}, {lane:1, type:'circle', hitAt:5200}, // 동시
-            ]},
-            // ROUND 3 — ×1.16 | 10노트 | 번갈아 + 홀드 첫 등장
-            { name:'ROUND 3', notes:[
-                {lane:0, type:'circle', hitAt:1300},
-                {lane:1, type:'circle', hitAt:1800},
+                {lane:0, type:'circle', hitAt:1850},
                 {lane:0, type:'circle', hitAt:2300},
-                {lane:0, type:'bar',    hitAt:3300, barMs:900},
-                {lane:1, type:'circle', hitAt:4450},
-                {lane:0, type:'circle', hitAt:4950},
-                {lane:1, type:'circle', hitAt:5450},
-                {lane:1, type:'bar',    hitAt:6400, barMs:900},
-                {lane:0, type:'circle', hitAt:7500},
-                {lane:1, type:'circle', hitAt:8000},
+                // 우 단타
+                {lane:1, type:'circle', hitAt:2950},
+                // 우우우 (450ms)
+                {lane:1, type:'circle', hitAt:3700},
+                {lane:1, type:'circle', hitAt:4150},
+                {lane:1, type:'circle', hitAt:4600},
+                // 좌 단타
+                {lane:0, type:'circle', hitAt:5250},
+                // 동시 x2
+                {lane:0, type:'circle', hitAt:6000}, {lane:1, type:'circle', hitAt:6000},
+                {lane:0, type:'circle', hitAt:6700}, {lane:1, type:'circle', hitAt:6700},
             ]},
-            // ROUND 4 — ×1.24 | 11노트 | 450ms 연타 + 홀드
-            { name:'ROUND 4', notes:[
-                {lane:0, type:'circle', hitAt:1200},
-                {lane:1, type:'circle', hitAt:1650},
-                {lane:0, type:'circle', hitAt:2100},
-                {lane:1, type:'circle', hitAt:2550},
-                {lane:0, type:'circle', hitAt:3000},
-                {lane:0, type:'bar',    hitAt:3900, barMs:950},
-                {lane:1, type:'circle', hitAt:5050},
-                {lane:0, type:'circle', hitAt:5500},
-                {lane:1, type:'circle', hitAt:5950},
-                {lane:0, type:'circle', hitAt:6400},
-                {lane:1, type:'circle', hitAt:6850},
-            ]},
-            // ROUND 5 — ×1.32 | 11노트 | 홀드 중 반대 손 탭
-            { name:'ROUND 5', notes:[
-                {lane:0, type:'circle', hitAt:1150},
-                {lane:1, type:'circle', hitAt:1600},
-                {lane:0, type:'bar',    hitAt:2700, barMs:1000},
-                {lane:1, type:'circle', hitAt:2900},
-                {lane:1, type:'circle', hitAt:3350},
-                {lane:1, type:'bar',    hitAt:4500, barMs:1000},
+            // ══ ROUND 3 — ×1.16 | 12노트 ══
+            // 좌좌 우우 좌좌 우 + 홀드 첫 등장
+            { name:'ROUND 3', notes:[
+                // 좌좌 우우 (500ms)
+                {lane:0, type:'circle', hitAt:1300},
+                {lane:0, type:'circle', hitAt:1800},
+                {lane:1, type:'circle', hitAt:2300},
+                {lane:1, type:'circle', hitAt:2800},
+                // 좌 홀드
+                {lane:0, type:'bar',    hitAt:3600, barMs:850},
+                // 좌좌 우
                 {lane:0, type:'circle', hitAt:4700},
-                {lane:0, type:'circle', hitAt:5150},
-                {lane:0, type:'circle', hitAt:5900},
-                {lane:1, type:'circle', hitAt:6350},
-                {lane:0, type:'circle', hitAt:6350}, // 동시
+                {lane:0, type:'circle', hitAt:5200},
+                {lane:1, type:'circle', hitAt:5700},
+                // 우 홀드
+                {lane:1, type:'bar',    hitAt:6400, barMs:850},
+                // 좌 우 좌 (마무리)
+                {lane:0, type:'circle', hitAt:7450},
+                {lane:1, type:'circle', hitAt:7950},
+                {lane:0, type:'circle', hitAt:8450},
             ]},
-            // ROUND 6 — ×1.40 | 13노트 | 파파파팍! 320ms 버스트 등장
+            // ══ ROUND 4 — ×1.24 | 13노트 ══
+            // 좌좌좌 우 / 우우 좌좌 / 동시+홀드
+            { name:'ROUND 4', notes:[
+                // 좌좌좌 (420ms)
+                {lane:0, type:'circle', hitAt:1200},
+                {lane:0, type:'circle', hitAt:1620},
+                {lane:0, type:'circle', hitAt:2040},
+                // 우 (간격벌림)
+                {lane:1, type:'circle', hitAt:2700},
+                // 우우 좌좌 (420ms)
+                {lane:1, type:'circle', hitAt:3350},
+                {lane:1, type:'circle', hitAt:3770},
+                {lane:0, type:'circle', hitAt:4190},
+                {lane:0, type:'circle', hitAt:4610},
+                // 홀드 (우)
+                {lane:1, type:'bar',    hitAt:5400, barMs:950},
+                // 좌 우 좌 우 (400ms)
+                {lane:0, type:'circle', hitAt:6550},
+                {lane:1, type:'circle', hitAt:6950},
+                {lane:0, type:'circle', hitAt:7350},
+                {lane:1, type:'circle', hitAt:7750},
+            ]},
+            // ══ ROUND 5 — ×1.32 | 13노트 ══
+            // 3연속 같은 손 + 홀드 중 반대 연타
+            { name:'ROUND 5', notes:[
+                // 좌좌좌 (380ms)
+                {lane:0, type:'circle', hitAt:1150},
+                {lane:0, type:'circle', hitAt:1530},
+                {lane:0, type:'circle', hitAt:1910},
+                // 우우 (380ms)
+                {lane:1, type:'circle', hitAt:2550},
+                {lane:1, type:'circle', hitAt:2930},
+                // 좌 홀드 + 우 3연타
+                {lane:0, type:'bar',    hitAt:3700, barMs:1100},
+                {lane:1, type:'circle', hitAt:3900}, // 우 탭
+                {lane:1, type:'circle', hitAt:4280}, // 우
+                {lane:1, type:'circle', hitAt:4660}, // 우
+                // 우 홀드 + 좌 2연타
+                {lane:1, type:'bar',    hitAt:5400, barMs:1000},
+                {lane:0, type:'circle', hitAt:5600},
+                {lane:0, type:'circle', hitAt:5980},
+                // 동시 마무리
+                {lane:0, type:'circle', hitAt:6700}, {lane:1, type:'circle', hitAt:6700},
+            ]},
+            // ══ ROUND 6 — ×1.40 | 14노트 ══
+            // 좌좌좌우 / 우우우좌 버스트(330ms) + 동시 + 홀드
             { name:'ROUND 6', notes:[
-                // 4연타 버스트 (320ms)
+                // 좌좌좌 우 (330ms)
                 {lane:0, type:'circle', hitAt:1100},
-                {lane:1, type:'circle', hitAt:1420},
-                {lane:0, type:'circle', hitAt:1740},
-                {lane:1, type:'circle', hitAt:2060},
-                // 홀드
-                {lane:0, type:'bar',    hitAt:3000, barMs:950},
-                // 5연타 버스트 (320ms)
-                {lane:1, type:'circle', hitAt:4200},
-                {lane:0, type:'circle', hitAt:4520},
-                {lane:1, type:'circle', hitAt:4840},
-                {lane:0, type:'circle', hitAt:5160},
-                {lane:1, type:'circle', hitAt:5160}, // 동시!
-                // 마무리 + 홀드
-                {lane:0, type:'circle', hitAt:5900},
-                {lane:1, type:'bar',    hitAt:6700, barMs:950},
-                {lane:0, type:'circle', hitAt:7800},
+                {lane:0, type:'circle', hitAt:1430},
+                {lane:0, type:'circle', hitAt:1760},
+                {lane:1, type:'circle', hitAt:2090},
+                // 우우우 좌 (330ms)
+                {lane:1, type:'circle', hitAt:2750},
+                {lane:1, type:'circle', hitAt:3080},
+                {lane:1, type:'circle', hitAt:3410},
+                {lane:0, type:'circle', hitAt:3740},
+                // 좌 홀드
+                {lane:0, type:'bar',    hitAt:4500, barMs:950},
+                // 우우 좌 동시 (330ms)
+                {lane:1, type:'circle', hitAt:5700},
+                {lane:1, type:'circle', hitAt:6030},
+                {lane:0, type:'circle', hitAt:6030}, // 동시!
+                // 우 홀드 + 좌 단타
+                {lane:1, type:'bar',    hitAt:6800, barMs:950},
+                {lane:0, type:'circle', hitAt:7950},
             ]},
-            // ROUND 7 — ×1.50 | 16노트 | 왼홀드+오른 엇박 5연타 → 오른홀드+왼 엇박 5연타
-            // 엇박: 200-290-190-290-190ms (빠르게-느리게 교차)
+            // ══ ROUND 7 — ×1.50 | 16노트 ══
+            // 좌좌 우 / 좌 우우 / 좌홀드+우우우우 / 우홀드+좌좌좌
+            // 엇박: 간격 300-200 교차
             { name:'ROUND 7', notes:[
+                // 좌좌 우 좌 우우 (300ms 기준)
                 {lane:0, type:'circle', hitAt:1050},
-                {lane:1, type:'circle', hitAt:1340}, // +290
-                // 🔵 LEFT HOLD + RIGHT 5연타 엇박
-                {lane:0, type:'bar',    hitAt:2500, barMs:1900},
-                {lane:1, type:'circle', hitAt:2700}, // +200 (빠름!)
-                {lane:1, type:'circle', hitAt:2990}, // +290 (엇박 긴박)
-                {lane:1, type:'circle', hitAt:3180}, // +190 (빠름!)
-                {lane:1, type:'circle', hitAt:3470}, // +290 (엇박)
-                {lane:1, type:'circle', hitAt:3660}, // +190 (빠름!)
-                // 🟠 RIGHT HOLD + LEFT 5연타 엇박
-                {lane:1, type:'bar',    hitAt:4900, barMs:1900},
-                {lane:0, type:'circle', hitAt:5090}, // +190
-                {lane:0, type:'circle', hitAt:5380}, // +290
-                {lane:0, type:'circle', hitAt:5560}, // +180 (더 빠름!)
-                {lane:0, type:'circle', hitAt:5850}, // +290
-                {lane:0, type:'circle', hitAt:6030}, // +180 (더 빠름!)
-                // 피날레 동시
-                {lane:0, type:'circle', hitAt:6900},
-                {lane:1, type:'circle', hitAt:6900}, // 동시
+                {lane:0, type:'circle', hitAt:1350}, // +300
+                {lane:1, type:'circle', hitAt:1750}, // +400 간격벌림
+                {lane:0, type:'circle', hitAt:2050}, // +300
+                {lane:1, type:'circle', hitAt:2250}, // +200 좁아짐!
+                {lane:1, type:'circle', hitAt:2450}, // +200 계속 좁음!
+                // 🔵 좌 홀드 + 우 4연타 엇박(300-200-300-200)
+                {lane:0, type:'bar',    hitAt:3400, barMs:1800},
+                {lane:1, type:'circle', hitAt:3600}, // +200
+                {lane:1, type:'circle', hitAt:3900}, // +300 엇박
+                {lane:1, type:'circle', hitAt:4100}, // +200 좁아짐!
+                {lane:1, type:'circle', hitAt:4400}, // +300 엇박
+                // 🟠 우 홀드 + 좌 4연타 엇박(200-300-200-300)
+                {lane:1, type:'bar',    hitAt:5300, barMs:1800},
+                {lane:0, type:'circle', hitAt:5500}, // +200
+                {lane:0, type:'circle', hitAt:5700}, // +200 계속!
+                {lane:0, type:'circle', hitAt:6000}, // +300 갑자기 늦음!
+                {lane:0, type:'circle', hitAt:6200}, // +200 다시 빠름!
             ]},
-            // ROUND 8 — ×1.62 | 17노트 | 5연타 → 엇박4연타 → 양손홀드 → 엇박4연타 → 홀드+연타
-            // 엇박: 220-160 교차 (롱-숏 패턴)
+            // ══ ROUND 8 — ×1.62 | 17노트 ══
+            // 좌좌좌 우우 좌좌 우 + 양손홀드 + 좌좌 우우우 좌 우
+            // 엇박: 250-180-250-180
             { name:'ROUND 8', notes:[
-                // 오프닝 5연타 (250ms)
+                // 좌좌좌 (250ms)
                 {lane:0, type:'circle', hitAt:950},
-                {lane:1, type:'circle', hitAt:1200},
+                {lane:0, type:'circle', hitAt:1200},
                 {lane:0, type:'circle', hitAt:1450},
-                {lane:1, type:'circle', hitAt:1700},
-                {lane:0, type:'circle', hitAt:1950},
-                // 엇박 4연타 (220-160-220-160)
-                {lane:1, type:'circle', hitAt:2170}, // +220
-                {lane:0, type:'circle', hitAt:2330}, // +160 엇박!
-                {lane:1, type:'circle', hitAt:2550}, // +220
-                {lane:0, type:'circle', hitAt:2710}, // +160 엇박!
+                // 우우 (180ms 엇박!)
+                {lane:1, type:'circle', hitAt:1630},
+                {lane:1, type:'circle', hitAt:1810},
+                // 좌좌 (250ms)
+                {lane:0, type:'circle', hitAt:2060},
+                {lane:0, type:'circle', hitAt:2310},
+                // 우 단타
+                {lane:1, type:'circle', hitAt:2560},
                 // 양손 동시 홀드
-                {lane:0, type:'bar',    hitAt:3500, barMs:1100},
-                {lane:1, type:'bar',    hitAt:3500, barMs:1100},
-                // 엇박 4연타 재등장 (220-160-220-160)
-                {lane:1, type:'circle', hitAt:4900},
-                {lane:0, type:'circle', hitAt:5120}, // +220
-                {lane:1, type:'circle', hitAt:5280}, // +160 엇박!
-                {lane:0, type:'circle', hitAt:5500}, // +220
-                // LEFT HOLD + RIGHT 2연타
-                {lane:0, type:'bar',    hitAt:6300, barMs:1100},
-                {lane:1, type:'circle', hitAt:6500},
-                {lane:1, type:'circle', hitAt:6750}, // +250
+                {lane:0, type:'bar',    hitAt:3300, barMs:1100},
+                {lane:1, type:'bar',    hitAt:3300, barMs:1100},
+                // 좌좌 (250ms)
+                {lane:0, type:'circle', hitAt:4700},
+                {lane:0, type:'circle', hitAt:4950},
+                // 우우우 (180ms 엇박!)
+                {lane:1, type:'circle', hitAt:5130},
+                {lane:1, type:'circle', hitAt:5310},
+                {lane:1, type:'circle', hitAt:5490},
+                // 좌 우 (250ms 마무리)
+                {lane:0, type:'circle', hitAt:5740},
+                {lane:1, type:'circle', hitAt:5990},
             ]},
-            // ROUND 9 — ×1.75 | 16노트 | 극한 복합 (260ms 버스트 + 엇박 200-280-180-280-180)
+            // ══ ROUND 9 — ×1.75 | 18노트 ══
+            // 요청대로: 좌좌좌 우우 좌좌좌 우 좌좌 우 좌 우우우우
+            // 엇박: 220-160-220 등 불규칙
             { name:'ROUND 9', notes:[
-                // 빠른 5연타 (260ms)
+                // 좌좌좌 (220ms)
                 {lane:0, type:'circle', hitAt:900},
-                {lane:1, type:'circle', hitAt:1160},
-                {lane:0, type:'circle', hitAt:1420},
-                {lane:1, type:'circle', hitAt:1680},
-                {lane:0, type:'circle', hitAt:1940},
-                // RIGHT HOLD + LEFT 엇박 5연타 (200-280-180-280-180)
-                {lane:1, type:'bar',    hitAt:2900, barMs:1600},
-                {lane:0, type:'circle', hitAt:3100}, // +200
-                {lane:0, type:'circle', hitAt:3380}, // +280 엇박
-                {lane:0, type:'circle', hitAt:3560}, // +180 빠름!
-                {lane:0, type:'circle', hitAt:3840}, // +280 엇박
-                {lane:0, type:'circle', hitAt:4020}, // +180 빠름!
-                // 양손 동시 홀드
-                {lane:0, type:'bar',    hitAt:4900, barMs:1000},
-                {lane:1, type:'bar',    hitAt:4900, barMs:1000},
-                // 피날레 엇박 4연타 (200-150-200-150)
-                {lane:1, type:'circle', hitAt:6200},
-                {lane:0, type:'circle', hitAt:6400}, // +200
-                {lane:1, type:'circle', hitAt:6550}, // +150 엇박!
-                {lane:0, type:'circle', hitAt:6750}, // +200 → 동시로 마무리
+                {lane:0, type:'circle', hitAt:1120},
+                {lane:0, type:'circle', hitAt:1340},
+                // 우우 (160ms 엇박! 더 빠름)
+                {lane:1, type:'circle', hitAt:1560},
+                {lane:1, type:'circle', hitAt:1720},
+                // 좌좌좌 (220ms)
+                {lane:0, type:'circle', hitAt:1980},
+                {lane:0, type:'circle', hitAt:2200},
+                {lane:0, type:'circle', hitAt:2420},
+                // 우 단타 (간격 벌림 350ms)
+                {lane:1, type:'circle', hitAt:2770},
+                // 좌좌 (220ms)
+                {lane:0, type:'circle', hitAt:3150},
+                {lane:0, type:'circle', hitAt:3370},
+                // 우 단타 (350ms 간격벌림)
+                {lane:1, type:'circle', hitAt:3720},
+                // 좌 단타 (220ms)
+                {lane:0, type:'circle', hitAt:3940},
+                // 우우우우 (160ms 연속 엇박!)
+                {lane:1, type:'circle', hitAt:4250},
+                {lane:1, type:'circle', hitAt:4410},
+                {lane:1, type:'circle', hitAt:4570},
+                {lane:1, type:'circle', hitAt:4730},
+                // 양손 홀드 마무리
+                {lane:0, type:'bar',    hitAt:5500, barMs:1000},
+                {lane:1, type:'bar',    hitAt:5500, barMs:1000},
             ]},
-            // ROUND 10 — ×1.90 | 19노트 | BOSS: 연속 엇박 + 홀드 교차
-            // 엇박 간격: 180-270 교차 (숏-롱 패턴)
+            // ══ ROUND 10 — ×1.90 | 20노트 ══
+            // BOSS: 좌좌좌 우 / 우우 좌좌좌 / 우 좌 우우 / 홀드+연타 / 좌좌 우우우우
+            // 엇박: 200-150-200-150 혼합, 최고속도
             { name:'ROUND 10', notes:[
-                // 오프닝 4연타 (220ms) + 동시
+                // 좌좌좌 우 (200ms)
                 {lane:0, type:'circle', hitAt:850},
-                {lane:1, type:'circle', hitAt:1070},
-                {lane:0, type:'circle', hitAt:1290},
-                {lane:1, type:'circle', hitAt:1510},
-                {lane:0, type:'circle', hitAt:1730}, {lane:1, type:'circle', hitAt:1730}, // 동시!
-                // RIGHT HOLD + LEFT 엇박 4연타 (180-270-180-270)
-                {lane:1, type:'bar',    hitAt:2700, barMs:1700},
-                {lane:0, type:'circle', hitAt:2880}, // +180 (빠름!)
-                {lane:0, type:'circle', hitAt:3150}, // +270 (엇박)
-                {lane:0, type:'circle', hitAt:3330}, // +180 (빠름!)
-                {lane:0, type:'circle', hitAt:3600}, // +270 (엇박)
-                // 양손 홀드
-                {lane:0, type:'bar',    hitAt:4600, barMs:1000},
-                {lane:1, type:'bar',    hitAt:4600, barMs:1000},
-                // LEFT HOLD + RIGHT 엇박 4연타 (160-260-160-260)
-                {lane:0, type:'bar',    hitAt:5700, barMs:1500},
-                {lane:1, type:'circle', hitAt:5860}, // +160 (매우 빠름!)
-                {lane:1, type:'circle', hitAt:6120}, // +260 (엇박)
-                {lane:1, type:'circle', hitAt:6280}, // +160 (매우 빠름!)
-                {lane:1, type:'circle', hitAt:6540}, // +260 (엇박)
-                // 최종 동시 마무리
-                {lane:0, type:'circle', hitAt:7400}, {lane:1, type:'circle', hitAt:7400},
+                {lane:0, type:'circle', hitAt:1050},
+                {lane:0, type:'circle', hitAt:1250},
+                {lane:1, type:'circle', hitAt:1450},
+                // 우우 좌좌좌 (150ms 엇박!)
+                {lane:1, type:'circle', hitAt:1650},
+                {lane:1, type:'circle', hitAt:1800},
+                {lane:0, type:'circle', hitAt:1950},
+                {lane:0, type:'circle', hitAt:2100},
+                {lane:0, type:'circle', hitAt:2250},
+                // 우 좌 우우 (200ms + 150ms)
+                {lane:1, type:'circle', hitAt:2550},
+                {lane:0, type:'circle', hitAt:2750},
+                {lane:1, type:'circle', hitAt:2900}, // +150 엇박!
+                {lane:1, type:'circle', hitAt:3050}, // +150 엇박!
+                // 우 홀드 + 좌 3연타(200ms)
+                {lane:1, type:'bar',    hitAt:3800, barMs:1500},
+                {lane:0, type:'circle', hitAt:4000},
+                {lane:0, type:'circle', hitAt:4200},
+                {lane:0, type:'circle', hitAt:4400},
+                // 좌좌 우우우우 (150ms 폭주!)
+                {lane:0, type:'circle', hitAt:5100},
+                {lane:0, type:'circle', hitAt:5250},
+                {lane:1, type:'circle', hitAt:5400},
+                {lane:1, type:'circle', hitAt:5550},
+                {lane:1, type:'circle', hitAt:5700},
+                {lane:1, type:'circle', hitAt:5850},
+                // 최종 동시
+                {lane:0, type:'circle', hitAt:6400}, {lane:1, type:'circle', hitAt:6400},
             ]},
         ];
 
