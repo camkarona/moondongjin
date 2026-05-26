@@ -2158,9 +2158,9 @@
         // ⚙️ 볼트 조이기 리듬액션 게임
         // ══════════════════════════════════════
         const BOLT_SCROLL    = 0.32;  // px/ms — 기본속도 (1.5× 강화)
-        const BOLT_HIT_WIN   = 50;    // 서클 히트 윈도우 (타이트)
-        const BOLT_HOLD_WIN  = 64;    // 바 홀드 윈도우 (px)
-        const BOLT_HIT_RATIO = 0.48;  // 바 히트 인정 최소 홀드 비율
+        const BOLT_HIT_WIN   = 62;    // 서클 히트 윈도우 (±62px = ROUND1에서 약 194ms)
+        const BOLT_HOLD_WIN  = 68;    // 바 홀드 윈도우 (px)
+        const BOLT_HIT_RATIO = 0.46;  // 바 히트 인정 최소 홀드 비율
         // 패널별 속도 배수: ROUND 1→10, 점점 빨라짐
         const BOLT_SPEED_MULTS = [1.0, 1.08, 1.16, 1.24, 1.32, 1.40, 1.50, 1.62, 1.75, 1.90];
         // Lane 0 = 파란 육각볼트, Lane 1 = 주황 십자볼트
@@ -2552,8 +2552,8 @@
                 const lx = boltLaneX(note.lane);
 
                 if (note.type === 'circle') {
-                    // Miss: fell below hit zone
-                    if (ny > boltHitZoneY + BOLT_HIT_WIN + 15) {
+                    // Miss: 히트 윈도우 벗어나면 즉시 (데드존 제거)
+                    if (ny > boltHitZoneY + BOLT_HIT_WIN) {
                         note.state = 'missed';
                         boltHitEffects.push({ x: lx, y: boltHitZoneY - 18, color:'#e74c3c', label:'MISS', age:0 });
                         SFX.close();
