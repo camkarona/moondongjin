@@ -500,6 +500,78 @@
             border: 1px solid rgba(210, 105, 40, 0.70) !important;
             color: rgba(255, 215, 175, 0.96) !important;
         }
+
+        /* ── 볼트 조이기 게임 ── */
+        #scene-bolt {
+            background: linear-gradient(to bottom, #0d1b2a, #1b263b);
+            justify-content: flex-start; padding: 0; gap: 0;
+        }
+        .bolt-header {
+            width: 100%; padding: 10px 16px 8px;
+            background: rgba(0,0,0,0.45); flex-shrink: 0;
+            border-bottom: 1px solid rgba(243,156,18,0.30);
+        }
+        .bolt-status {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 13px; font-weight: bold; color: rgba(255,255,255,0.92);
+            margin-bottom: 4px;
+        }
+        .bolt-bubble {
+            background: rgba(243,156,18,0.12); border: 1px solid rgba(243,156,18,0.30);
+            border-radius: 10px; padding: 5px 12px;
+            font-size: 13px; color: rgba(255,255,255,0.88); text-align: center;
+        }
+        #bolt-canvas {
+            flex: 1; width: 100%; display: block; min-height: 160px;
+            touch-action: none;
+        }
+        .bolt-footer {
+            width: 100%; flex-shrink: 0; padding: 8px 14px 12px;
+            background: rgba(0,0,0,0.35);
+            border-top: 1px solid rgba(243,156,18,0.20);
+        }
+        .bolt-controls {
+            display: flex; gap: 10px; width: 100%; margin-bottom: 8px;
+        }
+        .bolt-btn {
+            flex: 1; height: 86px; font-size: 30px; font-weight: 900;
+            border: 3px solid #f39c12; border-radius: 16px;
+            background: linear-gradient(to bottom, #1e3a5f, #0d1b2a);
+            color: #f39c12; cursor: pointer; touch-action: none;
+            box-shadow: 0 5px 0 #7a5a00;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; gap: 3px;
+            user-select: none; -webkit-user-select: none;
+            transition: background 0.06s, transform 0.06s, box-shadow 0.06s;
+        }
+        .bolt-btn.pressed {
+            background: linear-gradient(to bottom, #f39c12, #d68910);
+            color: #0d1b2a; border-color: #ffd700;
+            transform: translateY(4px); box-shadow: 0 1px 0 #7a5a00;
+        }
+        .bolt-btn-label { font-size: 11px; font-weight: bold; opacity: 0.80; letter-spacing: 1px; }
+        /* 볼트 A — 파란 육각 */
+        #bolt-btn-0 { border-color: #2980b9; color: #2980b9; box-shadow: 0 5px 0 #1a5276; }
+        #bolt-btn-0.pressed { background: linear-gradient(to bottom, #2980b9, #1a5276); color: #fff; border-color: #5dade2; box-shadow: 0 1px 0 #1a5276; }
+        /* 볼트 B — 주황 십자 */
+        #bolt-btn-1 { border-color: #e67e22; color: #e67e22; box-shadow: 0 5px 0 #a04000; }
+        #bolt-btn-1.pressed { background: linear-gradient(to bottom, #e67e22, #d35400); color: #fff; border-color: #f39c12; box-shadow: 0 1px 0 #a04000; }
+        .bolt-quit {
+            width: 100%; padding: 10px 0; font-size: 13px; font-weight: bold;
+            background: rgba(110,42,12,0.75); border: 1px solid rgba(210,105,40,0.60);
+            color: rgba(255,215,175,0.90); border-radius: 12px;
+            cursor: pointer; touch-action: manipulation;
+        }
+        .bolt-quit:active { opacity: 0.7; }
+        /* 홀드 버튼 릴리즈 스프링 백 애니메이션 */
+        @keyframes boltBtnSpring {
+            0%   { transform: translateY(4px) scale(0.95); box-shadow: 0 1px 0 #7a5a00; }
+            55%  { transform: translateY(-3px) scale(1.04); box-shadow: 0 7px 0 #7a5a00; }
+            80%  { transform: translateY(1px) scale(0.99); box-shadow: 0 4px 0 #7a5a00; }
+            100% { transform: translateY(0) scale(1.0); box-shadow: 0 5px 0 #7a5a00; }
+        }
+        #bolt-btn-0.spring { animation: boltBtnSpring 0.24s ease-out forwards; box-shadow: 0 5px 0 #1a5276; }
+        #bolt-btn-1.spring { animation: boltBtnSpring 0.24s ease-out forwards; box-shadow: 0 5px 0 #a04000; }
     </style>
 </head>
 <body>
@@ -561,7 +633,7 @@
                 <button class="btn btn-menu" onclick="loadCuttingGame()">🥐 소금빵 컷팅</button>
                 <button class="btn btn-menu" onclick="loadSolarGame()">☀️ 솔라 패널 각도 맞히기</button>
                 <button class="btn btn-menu" onclick="loadBalloonGame()">🎯 유원지 풍선 다트</button>
-                <button class="btn-locked" disabled>🔒 &nbsp; COMING SOON</button>
+                <button class="btn btn-menu" onclick="loadBoltGame()">⚙️ 볼트 조이기 리듬액션</button>
                 <button class="btn-locked" disabled>🔒 &nbsp; COMING SOON</button>
             </div>
             <button class="btn btn-back" onclick="changeScene('scene-main')">뒤로가기</button>
@@ -665,6 +737,67 @@
                     <div id="bal-stat-hit" style="font-size:60px; font-weight:900; color:#2ecc71;"></div>
                     <div style="color:rgba(255,255,255,0.7); font-size:16px; margin-bottom:12px;">/ 10개 풍선 터뜨림</div>
                     <div id="bal-round-list" class="round-list"></div>
+                    <button class="btn" style="width:100%; margin-top:16px;" onclick="goToSelect()">처음으로 돌아가기</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ⑥ 볼트 조이기 리듬액션 게임 -->
+        <div id="scene-bolt" class="scene">
+            <div class="bolt-header">
+                <div class="bolt-status">
+                    <span id="bolt-panel-count">패널: 1 / 10</span>
+                    <span id="bolt-panel-name" style="color:#f39c12; font-size:13px;">⚙️ 볼트 조이기</span>
+                </div>
+                <div id="bolt-bubble" class="bolt-bubble">리듬에 맞춰 볼트를 조여라! 🔩</div>
+            </div>
+            <canvas id="bolt-canvas"></canvas>
+            <div class="bolt-footer">
+                <div class="bolt-controls">
+                    <button id="bolt-btn-0" class="bolt-btn">
+                        <span style="font-size:28px; font-weight:900;">⬡</span>
+                        <span class="bolt-btn-label">🔵 볼트 A (육각)</span>
+                    </button>
+                    <button id="bolt-btn-1" class="bolt-btn">
+                        <span style="font-size:28px; font-weight:900;">⊕</span>
+                        <span class="bolt-btn-label">🟠 볼트 B (십자)</span>
+                    </button>
+                </div>
+                <button class="bolt-quit" onclick="showQuit()">🏳️ 포기하기</button>
+            </div>
+            <!-- 튜토리얼 오버레이 -->
+            <div id="bolt-tooltip-overlay" class="overlay">
+                <div class="tooltip-box">
+                    <h2>⚙️ 볼트 조이기 리듬액션</h2>
+                    <p>태양광 패널 설치 현장에 왔습니다! ☀️</p>
+                    <p>리듬에 맞춰 볼트를 조여야 합니다!</p>
+                    <p class="tip-warn">🎵 빛나는 선에 노트가 닿을 때 눌러요!</p>
+                    <p>⬡ <strong style="color:#2980b9;">파란 육각</strong> = 볼트 A 탭!</p>
+                    <p>⊕ <strong style="color:#e67e22;">주황 십자</strong> = 볼트 B 탭!</p>
+                    <p>긴 막대 = <strong style="color:#f1c40f;">꾹 누르고 있기!</strong></p>
+                    <p style="font-size:13px; color:#bdc3c7;">위에서 내려오는 볼트를 받아쳐라!</p>
+                    <p style="font-size:12px; color:#95a5a6;">총 10개 패널을 완성하세요</p>
+                    <button class="btn" style="width:100%; margin-top:14px;" onclick="closeBoltTooltip()">시작! ⚙️</button>
+                </div>
+            </div>
+            <!-- 패널 결과 오버레이 -->
+            <div id="bolt-result-overlay" class="overlay">
+                <div class="result-box">
+                    <div id="bolt-res-title" class="result-title"></div>
+                    <div id="bolt-res-score" class="score-display"></div>
+                    <div id="bolt-res-rating" class="rating-text"></div>
+                    <p id="bolt-res-desc" style="margin:10px 0 20px; font-size:14px; color:#ecf0f1; line-height:1.5;"></p>
+                    <button id="bolt-next-btn" class="btn" style="width:100%;" onclick="nextBoltPanel()">다음 패널! ➡️</button>
+                </div>
+            </div>
+            <!-- 최종 결과 오버레이 -->
+            <div id="bolt-final-overlay" class="overlay">
+                <div class="final-box">
+                    <div class="result-title">⚙️ 볼트 조이기 결과!</div>
+                    <div id="bolt-final-rank" class="rating-text" style="color:#f1c40f; margin:8px 0;"></div>
+                    <div id="bolt-stat-pct" style="font-size:64px; font-weight:900; color:#2ecc71;"></div>
+                    <div style="color:rgba(255,255,255,0.7); font-size:16px; margin-bottom:12px;">볼트 성공률</div>
+                    <div id="bolt-round-list" class="round-list"></div>
                     <button class="btn" style="width:100%; margin-top:16px;" onclick="goToSelect()">처음으로 돌아가기</button>
                 </div>
             </div>
@@ -864,6 +997,55 @@
                     const c = get(), t = c.currentTime;
                     [523, 659, 784, 659, 784, 1047].forEach((f, i) =>
                         note(f, 'sine', t + i * 0.1, 0.28, 0.28, c));
+                },
+                grip: () => {
+                    // 볼트 쥐는 소리 — 메탈릭 클릭 + 저음 충격
+                    const c = get(), t = c.currentTime;
+                    const bufLen = Math.floor(c.sampleRate * 0.028);
+                    const buf = c.createBuffer(1, bufLen, c.sampleRate);
+                    const data = buf.getChannelData(0);
+                    for (let i = 0; i < bufLen; i++)
+                        data[i] = (Math.random()*2-1) * Math.pow(1-i/bufLen, 3);
+                    const ns = c.createBufferSource(); ns.buffer = buf;
+                    const flt = c.createBiquadFilter();
+                    flt.type='bandpass'; flt.frequency.value=3400; flt.Q.value=2.8;
+                    const gn = c.createGain();
+                    ns.connect(flt); flt.connect(gn); gn.connect(c.destination);
+                    gn.gain.setValueAtTime(v(0.40), t);
+                    gn.gain.exponentialRampToValueAtTime(0.001, t+0.032);
+                    ns.start(t); ns.stop(t+0.04);
+                    // 저음 충격
+                    const osc = c.createOscillator(), g2 = c.createGain();
+                    osc.connect(g2); g2.connect(c.destination); osc.type='sine';
+                    osc.frequency.setValueAtTime(210, t);
+                    osc.frequency.exponentialRampToValueAtTime(65, t+0.10);
+                    g2.gain.setValueAtTime(v(0.45), t);
+                    g2.gain.exponentialRampToValueAtTime(0.001, t+0.11);
+                    osc.start(t); osc.stop(t+0.12);
+                },
+                release: () => {
+                    // 볼트 놓는 소리 — 짧은 금속 탁! + 상승 칩
+                    const c = get(), t = c.currentTime;
+                    const bufLen = Math.floor(c.sampleRate * 0.018);
+                    const buf = c.createBuffer(1, bufLen, c.sampleRate);
+                    const data = buf.getChannelData(0);
+                    for (let i = 0; i < bufLen; i++)
+                        data[i] = (Math.random()*2-1) * Math.pow(1-i/bufLen, 2);
+                    const ns = c.createBufferSource(); ns.buffer = buf;
+                    const flt = c.createBiquadFilter();
+                    flt.type='highpass'; flt.frequency.value=2200;
+                    const gn = c.createGain();
+                    ns.connect(flt); flt.connect(gn); gn.connect(c.destination);
+                    gn.gain.setValueAtTime(v(0.28), t);
+                    gn.gain.exponentialRampToValueAtTime(0.001, t+0.022);
+                    ns.start(t); ns.stop(t+0.03);
+                    const osc = c.createOscillator(), g2 = c.createGain();
+                    osc.connect(g2); g2.connect(c.destination); osc.type='sine';
+                    osc.frequency.setValueAtTime(300, t);
+                    osc.frequency.exponentialRampToValueAtTime(560, t+0.055);
+                    g2.gain.setValueAtTime(v(0.22), t);
+                    g2.gain.exponentialRampToValueAtTime(0.001, t+0.065);
+                    osc.start(t); osc.stop(t+0.07);
                 }
             };
         })();
@@ -1123,9 +1305,11 @@
         }
 
         function goToSelect() {
-            ['final-overlay','bal-final-overlay','bal-result-overlay','bal-tooltip-overlay']
+            ['final-overlay','bal-final-overlay','bal-result-overlay','bal-tooltip-overlay',
+             'bolt-final-overlay','bolt-result-overlay','bolt-tooltip-overlay']
                 .forEach(id => document.getElementById(id).classList.remove('show'));
             if (balRafId) { cancelAnimationFrame(balRafId); balRafId = null; }
+            if (boltRafId) { cancelAnimationFrame(boltRafId); boltRafId = null; }
             changeScene('scene-select');
         }
 
@@ -1142,8 +1326,11 @@
             cancelAnimationFrame(rafId);
             solSpinStop();
             if (balRafId) { cancelAnimationFrame(balRafId); balRafId = null; }
+            if (boltRafId) { cancelAnimationFrame(boltRafId); boltRafId = null; }
+            boltGameState = 'idle'; boltHolding = [false, false];
             ['result-overlay','final-overlay','tooltip-overlay','sol-tooltip-overlay',
-             'bal-result-overlay','bal-final-overlay','bal-tooltip-overlay']
+             'bal-result-overlay','bal-final-overlay','bal-tooltip-overlay',
+             'bolt-result-overlay','bolt-final-overlay','bolt-tooltip-overlay']
                 .forEach(id => document.getElementById(id).classList.remove('show'));
             changeScene('scene-main');
         }
@@ -1965,6 +2152,731 @@
                  </div>`
             ).join('');
             document.getElementById('bal-final-overlay').classList.add('show');
+        }
+
+        // ══════════════════════════════════════
+        // ⚙️ 볼트 조이기 리듬액션 게임
+        // ══════════════════════════════════════
+        const BOLT_SCROLL    = 0.32;  // px/ms — 기본속도 (1.5× 강화)
+        const BOLT_HIT_WIN   = 50;    // 서클 히트 윈도우 (타이트)
+        const BOLT_HOLD_WIN  = 64;    // 바 홀드 윈도우 (px)
+        const BOLT_HIT_RATIO = 0.48;  // 바 히트 인정 최소 홀드 비율
+        // 패널별 속도 배수: ROUND 1→10, 점점 빨라짐
+        const BOLT_SPEED_MULTS = [1.0, 1.08, 1.16, 1.24, 1.32, 1.40, 1.50, 1.62, 1.75, 1.90];
+        // Lane 0 = 파란 육각볼트, Lane 1 = 주황 십자볼트
+        const BOLT_COLORS = ['#2980b9', '#e67e22'];
+        const BOLT_DARK   = ['#1a5276', '#a04000'];
+
+        // 10 patterns: each note has lane (0|1), type ('circle'|'bar'),
+        // hitAt (ms from panel start when note center reaches hit zone),
+        // barMs (duration in ms, only for bar notes)
+        const BOLT_PATTERNS = [
+            // ROUND 1 — ×1.00 | 9노트 | 기본 번갈아 560ms
+            // 첫 노트: 패널 시작 후 화면 맨 위에서 진입
+            { name:'ROUND 1', notes:[
+                {lane:0, type:'circle', hitAt:1500},
+                {lane:1, type:'circle', hitAt:2060},
+                {lane:0, type:'circle', hitAt:2620},
+                {lane:1, type:'circle', hitAt:3180},
+                {lane:0, type:'circle', hitAt:3740},
+                {lane:1, type:'circle', hitAt:4300},
+                {lane:0, type:'circle', hitAt:4860},
+                {lane:1, type:'circle', hitAt:5420},
+                {lane:0, type:'circle', hitAt:5980},
+            ]},
+            // ROUND 2 — ×1.08 | 10노트 | 번갈아 500ms + 동시탭 2쌍
+            { name:'ROUND 2', notes:[
+                {lane:0, type:'circle', hitAt:1400},
+                {lane:1, type:'circle', hitAt:1900},
+                {lane:0, type:'circle', hitAt:2400},
+                {lane:1, type:'circle', hitAt:2900},
+                {lane:0, type:'circle', hitAt:3400}, {lane:1, type:'circle', hitAt:3400}, // 동시
+                {lane:0, type:'circle', hitAt:4200},
+                {lane:1, type:'circle', hitAt:4700},
+                {lane:0, type:'circle', hitAt:5200}, {lane:1, type:'circle', hitAt:5200}, // 동시
+            ]},
+            // ROUND 3 — ×1.16 | 10노트 | 번갈아 + 홀드 첫 등장
+            { name:'ROUND 3', notes:[
+                {lane:0, type:'circle', hitAt:1300},
+                {lane:1, type:'circle', hitAt:1800},
+                {lane:0, type:'circle', hitAt:2300},
+                {lane:0, type:'bar',    hitAt:3300, barMs:900},
+                {lane:1, type:'circle', hitAt:4450},
+                {lane:0, type:'circle', hitAt:4950},
+                {lane:1, type:'circle', hitAt:5450},
+                {lane:1, type:'bar',    hitAt:6400, barMs:900},
+                {lane:0, type:'circle', hitAt:7500},
+                {lane:1, type:'circle', hitAt:8000},
+            ]},
+            // ROUND 4 — ×1.24 | 11노트 | 450ms 연타 + 홀드
+            { name:'ROUND 4', notes:[
+                {lane:0, type:'circle', hitAt:1200},
+                {lane:1, type:'circle', hitAt:1650},
+                {lane:0, type:'circle', hitAt:2100},
+                {lane:1, type:'circle', hitAt:2550},
+                {lane:0, type:'circle', hitAt:3000},
+                {lane:0, type:'bar',    hitAt:3900, barMs:950},
+                {lane:1, type:'circle', hitAt:5050},
+                {lane:0, type:'circle', hitAt:5500},
+                {lane:1, type:'circle', hitAt:5950},
+                {lane:0, type:'circle', hitAt:6400},
+                {lane:1, type:'circle', hitAt:6850},
+            ]},
+            // ROUND 5 — ×1.32 | 11노트 | 홀드 중 반대 손 탭
+            { name:'ROUND 5', notes:[
+                {lane:0, type:'circle', hitAt:1150},
+                {lane:1, type:'circle', hitAt:1600},
+                {lane:0, type:'bar',    hitAt:2700, barMs:1000},
+                {lane:1, type:'circle', hitAt:2900},
+                {lane:1, type:'circle', hitAt:3350},
+                {lane:1, type:'bar',    hitAt:4500, barMs:1000},
+                {lane:0, type:'circle', hitAt:4700},
+                {lane:0, type:'circle', hitAt:5150},
+                {lane:0, type:'circle', hitAt:5900},
+                {lane:1, type:'circle', hitAt:6350},
+                {lane:0, type:'circle', hitAt:6350}, // 동시
+            ]},
+            // ROUND 6 — ×1.40 | 13노트 | 파파파팍! 320ms 버스트 등장
+            { name:'ROUND 6', notes:[
+                // 4연타 버스트 (320ms)
+                {lane:0, type:'circle', hitAt:1100},
+                {lane:1, type:'circle', hitAt:1420},
+                {lane:0, type:'circle', hitAt:1740},
+                {lane:1, type:'circle', hitAt:2060},
+                // 홀드
+                {lane:0, type:'bar',    hitAt:3000, barMs:950},
+                // 5연타 버스트 (320ms)
+                {lane:1, type:'circle', hitAt:4200},
+                {lane:0, type:'circle', hitAt:4520},
+                {lane:1, type:'circle', hitAt:4840},
+                {lane:0, type:'circle', hitAt:5160},
+                {lane:1, type:'circle', hitAt:5160}, // 동시!
+                // 마무리 + 홀드
+                {lane:0, type:'circle', hitAt:5900},
+                {lane:1, type:'bar',    hitAt:6700, barMs:950},
+                {lane:0, type:'circle', hitAt:7800},
+            ]},
+            // ROUND 7 — ×1.50 | 16노트 | 왼홀드+오른 엇박 5연타 → 오른홀드+왼 엇박 5연타
+            // 엇박: 200-290-190-290-190ms (빠르게-느리게 교차)
+            { name:'ROUND 7', notes:[
+                {lane:0, type:'circle', hitAt:1050},
+                {lane:1, type:'circle', hitAt:1340}, // +290
+                // 🔵 LEFT HOLD + RIGHT 5연타 엇박
+                {lane:0, type:'bar',    hitAt:2500, barMs:1900},
+                {lane:1, type:'circle', hitAt:2700}, // +200 (빠름!)
+                {lane:1, type:'circle', hitAt:2990}, // +290 (엇박 긴박)
+                {lane:1, type:'circle', hitAt:3180}, // +190 (빠름!)
+                {lane:1, type:'circle', hitAt:3470}, // +290 (엇박)
+                {lane:1, type:'circle', hitAt:3660}, // +190 (빠름!)
+                // 🟠 RIGHT HOLD + LEFT 5연타 엇박
+                {lane:1, type:'bar',    hitAt:4900, barMs:1900},
+                {lane:0, type:'circle', hitAt:5090}, // +190
+                {lane:0, type:'circle', hitAt:5380}, // +290
+                {lane:0, type:'circle', hitAt:5560}, // +180 (더 빠름!)
+                {lane:0, type:'circle', hitAt:5850}, // +290
+                {lane:0, type:'circle', hitAt:6030}, // +180 (더 빠름!)
+                // 피날레 동시
+                {lane:0, type:'circle', hitAt:6900},
+                {lane:1, type:'circle', hitAt:6900}, // 동시
+            ]},
+            // ROUND 8 — ×1.62 | 17노트 | 5연타 → 엇박4연타 → 양손홀드 → 엇박4연타 → 홀드+연타
+            // 엇박: 220-160 교차 (롱-숏 패턴)
+            { name:'ROUND 8', notes:[
+                // 오프닝 5연타 (250ms)
+                {lane:0, type:'circle', hitAt:950},
+                {lane:1, type:'circle', hitAt:1200},
+                {lane:0, type:'circle', hitAt:1450},
+                {lane:1, type:'circle', hitAt:1700},
+                {lane:0, type:'circle', hitAt:1950},
+                // 엇박 4연타 (220-160-220-160)
+                {lane:1, type:'circle', hitAt:2170}, // +220
+                {lane:0, type:'circle', hitAt:2330}, // +160 엇박!
+                {lane:1, type:'circle', hitAt:2550}, // +220
+                {lane:0, type:'circle', hitAt:2710}, // +160 엇박!
+                // 양손 동시 홀드
+                {lane:0, type:'bar',    hitAt:3500, barMs:1100},
+                {lane:1, type:'bar',    hitAt:3500, barMs:1100},
+                // 엇박 4연타 재등장 (220-160-220-160)
+                {lane:1, type:'circle', hitAt:4900},
+                {lane:0, type:'circle', hitAt:5120}, // +220
+                {lane:1, type:'circle', hitAt:5280}, // +160 엇박!
+                {lane:0, type:'circle', hitAt:5500}, // +220
+                // LEFT HOLD + RIGHT 2연타
+                {lane:0, type:'bar',    hitAt:6300, barMs:1100},
+                {lane:1, type:'circle', hitAt:6500},
+                {lane:1, type:'circle', hitAt:6750}, // +250
+            ]},
+            // ROUND 9 — ×1.75 | 16노트 | 극한 복합 (260ms 버스트 + 엇박 200-280-180-280-180)
+            { name:'ROUND 9', notes:[
+                // 빠른 5연타 (260ms)
+                {lane:0, type:'circle', hitAt:900},
+                {lane:1, type:'circle', hitAt:1160},
+                {lane:0, type:'circle', hitAt:1420},
+                {lane:1, type:'circle', hitAt:1680},
+                {lane:0, type:'circle', hitAt:1940},
+                // RIGHT HOLD + LEFT 엇박 5연타 (200-280-180-280-180)
+                {lane:1, type:'bar',    hitAt:2900, barMs:1600},
+                {lane:0, type:'circle', hitAt:3100}, // +200
+                {lane:0, type:'circle', hitAt:3380}, // +280 엇박
+                {lane:0, type:'circle', hitAt:3560}, // +180 빠름!
+                {lane:0, type:'circle', hitAt:3840}, // +280 엇박
+                {lane:0, type:'circle', hitAt:4020}, // +180 빠름!
+                // 양손 동시 홀드
+                {lane:0, type:'bar',    hitAt:4900, barMs:1000},
+                {lane:1, type:'bar',    hitAt:4900, barMs:1000},
+                // 피날레 엇박 4연타 (200-150-200-150)
+                {lane:1, type:'circle', hitAt:6200},
+                {lane:0, type:'circle', hitAt:6400}, // +200
+                {lane:1, type:'circle', hitAt:6550}, // +150 엇박!
+                {lane:0, type:'circle', hitAt:6750}, // +200 → 동시로 마무리
+            ]},
+            // ROUND 10 — ×1.90 | 19노트 | BOSS: 연속 엇박 + 홀드 교차
+            // 엇박 간격: 180-270 교차 (숏-롱 패턴)
+            { name:'ROUND 10', notes:[
+                // 오프닝 4연타 (220ms) + 동시
+                {lane:0, type:'circle', hitAt:850},
+                {lane:1, type:'circle', hitAt:1070},
+                {lane:0, type:'circle', hitAt:1290},
+                {lane:1, type:'circle', hitAt:1510},
+                {lane:0, type:'circle', hitAt:1730}, {lane:1, type:'circle', hitAt:1730}, // 동시!
+                // RIGHT HOLD + LEFT 엇박 4연타 (180-270-180-270)
+                {lane:1, type:'bar',    hitAt:2700, barMs:1700},
+                {lane:0, type:'circle', hitAt:2880}, // +180 (빠름!)
+                {lane:0, type:'circle', hitAt:3150}, // +270 (엇박)
+                {lane:0, type:'circle', hitAt:3330}, // +180 (빠름!)
+                {lane:0, type:'circle', hitAt:3600}, // +270 (엇박)
+                // 양손 홀드
+                {lane:0, type:'bar',    hitAt:4600, barMs:1000},
+                {lane:1, type:'bar',    hitAt:4600, barMs:1000},
+                // LEFT HOLD + RIGHT 엇박 4연타 (160-260-160-260)
+                {lane:0, type:'bar',    hitAt:5700, barMs:1500},
+                {lane:1, type:'circle', hitAt:5860}, // +160 (매우 빠름!)
+                {lane:1, type:'circle', hitAt:6120}, // +260 (엇박)
+                {lane:1, type:'circle', hitAt:6280}, // +160 (매우 빠름!)
+                {lane:1, type:'circle', hitAt:6540}, // +260 (엇박)
+                // 최종 동시 마무리
+                {lane:0, type:'circle', hitAt:7400}, {lane:1, type:'circle', hitAt:7400},
+            ]},
+        ];
+
+        const BOLT_BUBBLES = [
+            '리듬에 맞춰 볼트를 조여라! 🔩',
+            '탭탭! 동시에도 노려봐! ⚡',
+            '홀드 나왔다! 꽉 잡아! 💪',
+            '간격이 짧아진다! 집중! ⚙️',
+            '한 손 잡고, 한 손 탭! 🛠️',
+            '파파파팍! 버스트 패턴 시작! 🔥',
+            '홀드 누른 채 반대 손 연타! 💥',
+            '양손 다 쓴다! 정신 차려! 😤',
+            '극한이다! 박자 놓치지 마! 🎯',
+            'BOSS! 살아남아라, 문동진! 🏆',
+        ];
+
+        let boltCanvas = null, boltCtx = null;
+        let boltW = 0, boltH = 0, boltHitZoneY = 0;
+        let boltPanelIdx = 0;
+        let boltCurrentNotes = [];
+        let boltPanelStart = 0, boltElapsed = 0;
+        let boltRafId = null, boltLastTs = 0;
+        let boltTotalHits = 0, boltTotalNotes = 0;
+        let boltPanelHits = 0;
+        let boltPanelResults = [];
+        let boltGameState = 'idle'; // idle | playing | panel_done | final
+        let boltHolding = [false, false];
+        let boltCurrentSpeed = 1.0; // 패널별 속도 배수
+        let boltHitEffects = []; // {x,y,color,label,age}
+
+        function loadBoltGame() {
+            currentGame = 'bolt';
+            boltPanelIdx = 0;
+            boltTotalHits = 0; boltTotalNotes = 0;
+            boltPanelResults = [];
+            boltGameState = 'idle';
+            boltHolding = [false, false];
+            boltCurrentSpeed = 1.0;
+            boltHitEffects = [];
+            if (boltRafId) { cancelAnimationFrame(boltRafId); boltRafId = null; }
+            changeScene('scene-bolt');
+            document.getElementById('bolt-tooltip-overlay').classList.add('show');
+        }
+
+        function closeBoltTooltip() {
+            document.getElementById('bolt-tooltip-overlay').classList.remove('show');
+            requestAnimationFrame(() => {
+                boltCanvas = document.getElementById('bolt-canvas');
+                boltCtx = boltCanvas.getContext('2d');
+                const rect = boltCanvas.getBoundingClientRect();
+                boltW = Math.round(rect.width);
+                boltH = Math.round(rect.height);
+                boltCanvas.width = boltW; boltCanvas.height = boltH;
+                boltHitZoneY = Math.round(boltH * 0.80);
+                setupBoltEvents();
+                initBoltPanel();
+                boltLastTs = 0;
+                boltRafId = requestAnimationFrame(boltLoop);
+            });
+        }
+
+        function setupBoltEvents() {
+            [0, 1].forEach(lane => {
+                const btn = document.getElementById('bolt-btn-' + lane);
+                // Remove old listeners by cloning
+                const nb = btn.cloneNode(true);
+                btn.parentNode.replaceChild(nb, btn);
+                const newBtn = document.getElementById('bolt-btn-' + lane);
+
+                newBtn.addEventListener('pointerdown', e => {
+                    e.preventDefault();
+                    // 포인터 캡처: 이 손가락의 이벤트가 이 버튼에 고정됨
+                    // → 다른 손가락으로 반대 버튼을 연타해도 홀드가 풀리지 않음
+                    try { newBtn.setPointerCapture(e.pointerId); } catch(_) {}
+                    boltHolding[lane] = true;
+                    newBtn.classList.remove('spring');
+                    newBtn.classList.add('pressed');
+
+                    // 홀드 노트가 히트존에 있으면 GRIP 타격감
+                    const barActive = boltCurrentNotes.some(n =>
+                        n.lane === lane && n.type === 'bar' && n.state === 'pending' && n.inZone);
+                    if (barActive) {
+                        SFX.grip();
+                        boltHitEffects.push({
+                            x: boltLaneX(lane), y: boltHitZoneY - 36,
+                            color: BOLT_COLORS[lane], label: 'GRIP! 💪', age: 0
+                        });
+                    }
+                    boltTap(lane);
+                }, { passive: false });
+
+                const onRelease = () => {
+                    if (!boltHolding[lane]) return;
+                    const wasHolding = boltCurrentNotes.some(n =>
+                        n.lane === lane && n.type === 'bar' && n.state === 'pending' && n.holdTime > 80);
+                    boltHolding[lane] = false;
+                    newBtn.classList.remove('pressed');
+                    void newBtn.offsetWidth; // reflow for spring
+                    newBtn.classList.add('spring');
+                    setTimeout(() => newBtn.classList.remove('spring'), 260);
+                    if (wasHolding) {
+                        SFX.release();
+                        boltHitEffects.push({
+                            x: boltLaneX(lane), y: boltHitZoneY - 48,
+                            color: '#fff', label: '🔧 TIGHTEN!', age: 0
+                        });
+                    }
+                };
+                // pointerleave 제거 — setPointerCapture 사용 시 불필요하며 오동작 유발
+                ['pointerup', 'pointercancel'].forEach(ev => {
+                    newBtn.addEventListener(ev, onRelease);
+                });
+            });
+        }
+
+        function initBoltPanel() {
+            const pat = BOLT_PATTERNS[boltPanelIdx];
+            boltCurrentSpeed = BOLT_SPEED_MULTS[boltPanelIdx] || 1.0;
+            boltCurrentNotes = pat.notes.map(n => ({
+                lane: n.lane, type: n.type, hitAt: n.hitAt,
+                barMs: n.barMs || 0,
+                state: 'pending',
+                holdTime: 0, inZoneTime: 0, inZone: false,
+            }));
+            boltPanelHits = 0;
+            boltElapsed = 0;
+            boltPanelStart = performance.now();
+            boltGameState = 'playing';
+            boltHitEffects = [];
+            document.getElementById('bolt-panel-count').textContent = `패널: ${boltPanelIdx+1} / 10`;
+            const speedTag = boltCurrentSpeed > 1.0
+                ? ` <span style="color:#e74c3c;font-size:11px;">×${boltCurrentSpeed.toFixed(2).replace(/\.?0+$/,'')} SPEED</span>` : '';
+            document.getElementById('bolt-panel-name').innerHTML = `⚙️ ${pat.name}${speedTag}`;
+            document.getElementById('bolt-bubble').textContent = BOLT_BUBBLES[boltPanelIdx] || BOLT_BUBBLES[0];
+        }
+
+        // noteY: 위→아래, elapsed==hitAt일 때 hitZoneY. 속도 배수 반영.
+        function boltNoteY(note) {
+            return boltHitZoneY - (note.hitAt - boltElapsed) * BOLT_SCROLL * boltCurrentSpeed;
+        }
+        // 바 노트 반높이 (속도 적용 + 최대 화면 45% 캡)
+        function boltBarHalfH(note) {
+            return Math.min((note.barMs * BOLT_SCROLL * boltCurrentSpeed) / 2, boltH * 0.22);
+        }
+        // Two vertical lanes: left (lane 0) and right (lane 1)
+        function boltLaneX(lane) {
+            return lane === 0 ? Math.round(boltW * 0.28) : Math.round(boltW * 0.72);
+        }
+        function boltNoteR() { return Math.max(18, Math.round(boltW * 0.095)); }
+
+        function boltTap(lane) {
+            if (boltGameState !== 'playing') return;
+            for (const note of boltCurrentNotes) {
+                if (note.lane !== lane || note.type !== 'circle' || note.state !== 'pending') continue;
+                const ny = boltNoteY(note);
+                if (Math.abs(ny - boltHitZoneY) < BOLT_HIT_WIN) {
+                    note.state = 'hit';
+                    boltPanelHits++;
+                    boltHitEffects.push({ x: boltLaneX(lane), y: boltHitZoneY - 18,
+                        color: BOLT_COLORS[lane], label:'PERFECT!', age:0 });
+                    SFX.perfect();
+                    return;
+                }
+            }
+        }
+
+        function boltRoundRect(ctx, x, y, w, h, r) {
+            r = Math.min(r, w/2, h/2);
+            ctx.beginPath();
+            ctx.moveTo(x+r, y);
+            ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+            ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+            ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+            ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
+            ctx.closePath();
+        }
+
+        function boltLoop(ts) {
+            const dt = (boltLastTs > 0) ? Math.min(ts - boltLastTs, 50) : 16.67;
+            boltLastTs = ts;
+            boltRafId = requestAnimationFrame(boltLoop);
+            if (boltGameState === 'playing') {
+                boltElapsed = ts - boltPanelStart;
+                boltUpdateNotes(dt);
+                boltCheckPanelComplete();
+            }
+            boltRender(ts);
+        }
+
+        function boltUpdateNotes(dt) {
+            for (const note of boltCurrentNotes) {
+                if (note.state === 'hit' || note.state === 'missed') continue;
+                const ny = boltNoteY(note);
+                const lx = boltLaneX(note.lane);
+
+                if (note.type === 'circle') {
+                    // Miss: fell below hit zone
+                    if (ny > boltHitZoneY + BOLT_HIT_WIN + 15) {
+                        note.state = 'missed';
+                        boltHitEffects.push({ x: lx, y: boltHitZoneY - 18, color:'#e74c3c', label:'MISS', age:0 });
+                        SFX.close();
+                    }
+                } else {
+                    // Vertical bar: center at ny (속도 반영 halfH)
+                    const halfH = boltBarHalfH(note);
+                    const barT  = ny - halfH, barB = ny + halfH;
+                    const zoneT = boltHitZoneY - BOLT_HOLD_WIN;
+                    const zoneB = boltHitZoneY + BOLT_HOLD_WIN;
+                    const inZone = barB > zoneT && barT < zoneB;
+                    if (inZone) {
+                        note.inZoneTime += dt;
+                        if (boltHolding[note.lane]) note.holdTime += dt;
+                        note.inZone = true;
+                    } else {
+                        note.inZone = false;
+                    }
+                    // Bar fully below zone → evaluate
+                    if (barT > zoneB + 15 && note.state === 'pending') {
+                        const ratio = note.inZoneTime > 0 ? note.holdTime / note.inZoneTime : 0;
+                        if (ratio >= BOLT_HIT_RATIO) {
+                            note.state = 'hit'; boltPanelHits++;
+                            boltHitEffects.push({ x: lx, y: boltHitZoneY - 18, color: BOLT_COLORS[note.lane], label:'HOLD!', age:0 });
+                            SFX.good();
+                        } else {
+                            note.state = 'missed';
+                            boltHitEffects.push({ x: lx, y: boltHitZoneY - 18, color:'#e74c3c', label:'MISS', age:0 });
+                            SFX.close();
+                        }
+                    }
+                }
+            }
+            for (let i = boltHitEffects.length - 1; i >= 0; i--) {
+                boltHitEffects[i].age += dt;
+                if (boltHitEffects[i].age > 750) boltHitEffects.splice(i, 1);
+            }
+        }
+
+        function boltCheckPanelComplete() {
+            if (!boltCurrentNotes.length) return;
+            if (!boltCurrentNotes.every(n => n.state === 'hit' || n.state === 'missed')) return;
+            const lastEnd = Math.max(...boltCurrentNotes.map(n => n.hitAt + (n.barMs ? n.barMs/2 : 0)));
+            if (boltElapsed >= lastEnd + 350) {
+                boltGameState = 'panel_done';
+                setTimeout(showBoltPanelResult, 500);
+            }
+        }
+
+        // ── 볼트 그리기 헬퍼 ──
+        function drawHexBolt(ctx, x, y, r, missed) {
+            // 육각 너트 형태 (파란 계열)
+            const grad = ctx.createRadialGradient(x-r*0.25, y-r*0.25, 0, x, y, r);
+            grad.addColorStop(0, missed ? '#555' : '#5dade2');
+            grad.addColorStop(0.7, missed ? '#3a3a3a' : '#2980b9');
+            grad.addColorStop(1, missed ? '#2a2a2a' : '#1a5276');
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const ang = (Math.PI/6) + i*(Math.PI/3);
+                i===0 ? ctx.moveTo(x+r*Math.cos(ang), y+r*Math.sin(ang))
+                      : ctx.lineTo(x+r*Math.cos(ang), y+r*Math.sin(ang));
+            }
+            ctx.closePath();
+            ctx.fillStyle = missed ? '#2a2a2a' : grad; ctx.fill();
+            ctx.strokeStyle = missed ? '#555' : 'rgba(255,255,255,0.75)';
+            ctx.lineWidth = 2.5; ctx.stroke();
+            // 중앙 육각 구멍
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const ang = (Math.PI/6) + i*(Math.PI/3);
+                i===0 ? ctx.moveTo(x+r*0.40*Math.cos(ang), y+r*0.40*Math.sin(ang))
+                      : ctx.lineTo(x+r*0.40*Math.cos(ang), y+r*0.40*Math.sin(ang));
+            }
+            ctx.closePath();
+            ctx.fillStyle = missed ? '#444' : 'rgba(0,0,0,0.55)'; ctx.fill();
+            ctx.strokeStyle = missed ? '#555' : 'rgba(93,173,226,0.6)';
+            ctx.lineWidth = 1; ctx.stroke();
+        }
+
+        function drawPhillipsBolt(ctx, x, y, r, missed) {
+            // 동그란 십자 볼트 (주황 계열)
+            const grad = ctx.createRadialGradient(x-r*0.25, y-r*0.25, 0, x, y, r);
+            grad.addColorStop(0, missed ? '#555' : '#f8c471');
+            grad.addColorStop(0.6, missed ? '#3a3a3a' : '#e67e22');
+            grad.addColorStop(1, missed ? '#2a2a2a' : '#a04000');
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
+            ctx.fillStyle = missed ? '#2a2a2a' : grad; ctx.fill();
+            ctx.strokeStyle = missed ? '#555' : 'rgba(255,255,255,0.75)';
+            ctx.lineWidth = 2.5; ctx.stroke();
+            // 십자 홈 (Phillips screw)
+            if (!missed) {
+                ctx.save(); ctx.lineCap = 'round';
+                ctx.strokeStyle = 'rgba(0,0,0,0.60)'; ctx.lineWidth = r*0.40;
+                ctx.beginPath();
+                ctx.moveTo(x-r*0.55, y); ctx.lineTo(x+r*0.55, y);
+                ctx.moveTo(x, y-r*0.55); ctx.lineTo(x, y+r*0.55);
+                ctx.stroke();
+                ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.lineWidth = r*0.14;
+                ctx.beginPath();
+                ctx.moveTo(x-r*0.38, y-r*0.38); ctx.lineTo(x+r*0.38, y+r*0.38);
+                ctx.moveTo(x+r*0.38, y-r*0.38); ctx.lineTo(x-r*0.38, y+r*0.38);
+                ctx.stroke();
+                ctx.restore();
+            } else {
+                // 회색 십자
+                ctx.save(); ctx.lineCap = 'round';
+                ctx.strokeStyle = '#555'; ctx.lineWidth = r*0.36;
+                ctx.beginPath();
+                ctx.moveTo(x-r*0.52, y); ctx.lineTo(x+r*0.52, y);
+                ctx.moveTo(x, y-r*0.52); ctx.lineTo(x, y+r*0.52);
+                ctx.stroke(); ctx.restore();
+            }
+        }
+
+        function boltRender(ts) {
+            if (!boltCtx) return;
+            const ctx = boltCtx;
+            ctx.clearRect(0, 0, boltW, boltH);
+
+            // ── 배경 ──
+            ctx.fillStyle = '#0a0f1a'; ctx.fillRect(0, 0, boltW, boltH);
+
+            // 세로 레인 배경
+            const lx0 = boltLaneX(0), lx1 = boltLaneX(1);
+            const laneW = Math.round(boltW * 0.30);
+            // 레인 A (파란 틴트)
+            ctx.fillStyle = 'rgba(41,128,185,0.07)';
+            ctx.fillRect(lx0 - laneW/2, 0, laneW, boltH);
+            // 레인 B (주황 틴트)
+            ctx.fillStyle = 'rgba(230,126,34,0.07)';
+            ctx.fillRect(lx1 - laneW/2, 0, laneW, boltH);
+            // 중앙 구분선
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1; ctx.setLineDash([]);
+            ctx.beginPath(); ctx.moveTo(boltW/2, 0); ctx.lineTo(boltW/2, boltH); ctx.stroke();
+            // 레인 중심 점선
+            [lx0, lx1].forEach((lx, i) => {
+                ctx.strokeStyle = `rgba(${i===0?'41,128,185':'230,126,34'},0.18)`;
+                ctx.lineWidth = 1; ctx.setLineDash([4, 6]);
+                ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, boltH);
+                ctx.stroke(); ctx.setLineDash([]);
+            });
+
+            // 레인 상단 레이블
+            ctx.font = 'bold 12px sans-serif'; ctx.textBaseline = 'top';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = BOLT_COLORS[0];
+            ctx.fillText('⬡ A (육각)', lx0, 5);
+            ctx.fillStyle = BOLT_COLORS[1];
+            ctx.fillText('⊕ B (십자)', lx1, 5);
+
+            // ── 히트존 (수평선, 박자에 맞춰 맥동) ──
+            const beatMs = 500;
+            const pulse = Math.sin((boltElapsed % beatMs) / beatMs * Math.PI);
+            ctx.save();
+            ctx.shadowBlur = 10 + pulse * 18; ctx.shadowColor = '#f1c40f';
+            ctx.strokeStyle = `rgba(241,196,15,${0.72 + pulse*0.28})`;
+            ctx.lineWidth = 3; ctx.setLineDash([]);
+            ctx.beginPath(); ctx.moveTo(0, boltHitZoneY); ctx.lineTo(boltW, boltHitZoneY); ctx.stroke();
+            ctx.restore();
+            // 히트존 페이드 밴드
+            const hzGrd = ctx.createLinearGradient(0, boltHitZoneY-28, 0, boltHitZoneY+28);
+            hzGrd.addColorStop(0, 'rgba(241,196,15,0)');
+            hzGrd.addColorStop(0.5, `rgba(241,196,15,${0.07 + pulse*0.06})`);
+            hzGrd.addColorStop(1, 'rgba(241,196,15,0)');
+            ctx.fillStyle = hzGrd; ctx.fillRect(0, boltHitZoneY-28, boltW, 56);
+            // 히트존 원형 마커 (레인마다)
+            [lx0, lx1].forEach(lx => {
+                ctx.save();
+                ctx.shadowBlur = 8 + pulse*10; ctx.shadowColor = '#f1c40f';
+                ctx.strokeStyle = `rgba(241,196,15,${0.6+pulse*0.35})`;
+                ctx.lineWidth = 2.5;
+                ctx.beginPath(); ctx.arc(lx, boltHitZoneY, 20 + pulse*3, 0, Math.PI*2); ctx.stroke();
+                ctx.restore();
+            });
+
+            // ── 노트 그리기 (위→아래) ──
+            const noteR = boltNoteR();
+            const barW  = Math.round(noteR * 1.55);
+            for (const note of boltCurrentNotes) {
+                const ny = boltNoteY(note);
+                const lx = boltLaneX(note.lane);
+                if (ny < -250 || ny > boltH + 250) continue;
+                const missed = note.state === 'missed';
+                const hit    = note.state === 'hit';
+                if (hit) continue;
+
+                ctx.save();
+                // 히트존 접근 시 글로우
+                const distY = Math.abs(ny - boltHitZoneY);
+                if (!missed && distY < BOLT_HIT_WIN * 1.6) {
+                    ctx.shadowBlur = 14 * (1 - distY/(BOLT_HIT_WIN*1.6));
+                    ctx.shadowColor = BOLT_COLORS[note.lane];
+                }
+
+                if (note.type === 'circle') {
+                    if (note.lane === 0) {
+                        drawHexBolt(ctx, lx, ny, noteR, missed);
+                    } else {
+                        drawPhillipsBolt(ctx, lx, ny, noteR, missed);
+                    }
+                } else {
+                    // 수직 막대 (홀드 노트) — 속도 반영 + 캡 적용
+                    const halfH = boltBarHalfH(note);
+                    const barX  = lx - barW/2, barY = ny - halfH;
+                    const barH2 = halfH * 2;
+                    const col   = missed ? '#2a2a2a' : BOLT_DARK[note.lane];
+                    const stroke= missed ? '#444'    : BOLT_COLORS[note.lane];
+                    boltRoundRect(ctx, barX, barY, barW, barH2, 9);
+                    ctx.fillStyle = col; ctx.fill();
+                    ctx.strokeStyle = stroke; ctx.lineWidth = 2.2; ctx.stroke();
+                    // 나사선 무늬 (수평 스트라이프)
+                    if (!missed) {
+                        ctx.save();
+                        ctx.beginPath(); boltRoundRect(ctx, barX, barY, barW, barH2, 9); ctx.clip();
+                        ctx.strokeStyle = 'rgba(255,255,255,0.13)'; ctx.lineWidth = 2;
+                        for (let sy = barY+8; sy < barY+barH2; sy+=10) {
+                            ctx.beginPath(); ctx.moveTo(barX, sy); ctx.lineTo(barX+barW, sy); ctx.stroke();
+                        }
+                        // 홀드 진행 오버레이 (위→아래 채워짐)
+                        if (note.inZoneTime > 0) {
+                            const ratio = Math.min(note.holdTime/note.inZoneTime, 1);
+                            ctx.fillStyle = 'rgba(255,255,255,0.28)';
+                            ctx.fillRect(barX, barY, barW, barH2*ratio);
+                        }
+                        ctx.restore();
+                    }
+                    // HOLD 텍스트
+                    if (!missed && barH2 > 28) {
+                        ctx.fillStyle = 'rgba(255,255,255,0.90)';
+                        ctx.font = `bold ${Math.min(12, Math.round(barW*0.42))}px sans-serif`;
+                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillText('HOLD', lx, ny);
+                    }
+                }
+                ctx.restore();
+            }
+
+            // ── 히트 이펙트 ──
+            for (const ef of boltHitEffects) {
+                const alpha = Math.max(0, 1 - ef.age/750);
+                const rise  = ef.age * 0.055;
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                ctx.font = 'bold 15px sans-serif';
+                ctx.fillStyle = ef.color;
+                ctx.shadowBlur = 7; ctx.shadowColor = ef.color;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(ef.label, ef.x, ef.y - rise);
+                ctx.restore();
+            }
+
+            // ── 스코어 표시 ──
+            const hitN = boltCurrentNotes.filter(n => n.state === 'hit').length;
+            const totN = boltCurrentNotes.length;
+            ctx.fillStyle = 'rgba(255,255,255,0.45)';
+            ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+            ctx.fillText(`${hitN} / ${totN}`, boltW/2, boltH - 3);
+            ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        }
+
+        function showBoltPanelResult() {
+            const pat = BOLT_PATTERNS[boltPanelIdx];
+            const total = boltCurrentNotes.length;
+            boltTotalHits  += boltPanelHits;
+            boltTotalNotes += total;
+            const success = boltPanelHits === total;
+            boltPanelResults.push({ name: pat.name, hits: boltPanelHits, total, success });
+
+            let rating, color, desc;
+            if (success) {
+                rating = '⚙️ 완벽! 전부 조였어!'; color = '#2ecc71';
+                desc = `${total}/${total} 볼트 완성! 완벽한 시공입니다!`;
+                SFX.perfect();
+            } else if (boltPanelHits >= Math.ceil(total * 0.7)) {
+                rating = '👍 잘했어요!'; color = '#3498db';
+                desc = `${boltPanelHits}/${total} 볼트 완성. 조금만 더 집중해요!`;
+                SFX.good();
+            } else {
+                rating = '💦 연습이 필요해요'; color = '#e74c3c';
+                desc = `${boltPanelHits}/${total} 볼트만 완성... 리듬을 잘 살펴봐요!`;
+                SFX.fail();
+            }
+            const isLast = boltPanelIdx >= 9;
+            document.getElementById('bolt-res-title').textContent   = pat.name + ' 완료!';
+            document.getElementById('bolt-res-title').style.color   = '#f39c12';
+            document.getElementById('bolt-res-score').textContent   = `${boltPanelHits} / ${total} 볼트 성공`;
+            document.getElementById('bolt-res-rating').textContent  = rating;
+            document.getElementById('bolt-res-rating').style.color  = color;
+            document.getElementById('bolt-res-desc').textContent    = desc;
+            document.getElementById('bolt-next-btn').textContent    = isLast ? '최종 결과 보기 🏁' : '다음 패널! ➡️';
+            document.getElementById('bolt-result-overlay').classList.add('show');
+        }
+
+        function nextBoltPanel() {
+            document.getElementById('bolt-result-overlay').classList.remove('show');
+            boltPanelIdx++;
+            if (boltPanelIdx >= 10) { showBoltFinal(); return; }
+            boltHolding = [false, false];
+            boltHitEffects = [];
+            [0,1].forEach(l => document.getElementById('bolt-btn-'+l).classList.remove('pressed'));
+            initBoltPanel();
+        }
+
+        function showBoltFinal() {
+            document.getElementById('bolt-result-overlay').classList.remove('show');
+            if (boltRafId) { cancelAnimationFrame(boltRafId); boltRafId = null; }
+            SFX.fanfare();
+            const pct = boltTotalNotes > 0 ? Math.round(boltTotalHits / boltTotalNotes * 100) : 0;
+            let rank;
+            if      (pct >= 95) rank = '🏆 볼트 마스터 문동진!';
+            else if (pct >= 80) rank = '🥇 탁월한 태양광 기사!';
+            else if (pct >= 60) rank = '🥈 나쁘지 않아요, 조금 더!';
+            else if (pct >= 40) rank = '🥉 연습이 필요해요...';
+            else                rank = '😅 볼트가 다 느슨하잖아요!';
+            document.getElementById('bolt-final-rank').textContent = rank;
+            document.getElementById('bolt-stat-pct').textContent   = pct + '%';
+            document.getElementById('bolt-round-list').innerHTML   = boltPanelResults.map(r =>
+                `<div class="round-item ${r.success ? 'round-ok' : 'round-fail'}">
+                    <span>${r.success ? '✅' : '❌'} ${r.name}</span>
+                    <span style="color:${r.success ? '#2ecc71' : '#e74c3c'};">${r.hits}/${r.total}</span>
+                </div>`
+            ).join('');
+            document.getElementById('bolt-final-overlay').classList.add('show');
         }
     </script>
 </body>
